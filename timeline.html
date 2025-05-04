@@ -157,9 +157,8 @@
 
       const prompt = followUpText
         ? `The user has replied to your previous plan with: "${followUpText}". Re-plan accordingly with the new information.`
-        : `You are a task planning assistant helping someone with ADHD and executive dysfunction. Your tone is kind and supportive but also firm — like a tough but loving mum. Be playful where appropriate, add a gentle joke or quip, and do not assume or hallucinate.
+        : `You are a task planning assistant helping someone with ADHD and executive dysfunction. Be kind, encouraging and understanding, but not overly sweet or jokey. Speak plainly and helpfully, as if from someone grounded and empathetic. Use UK spelling and grammar. If you can detect the user's local time from their IP address, take it into account only if it's relevant to planning (e.g. if it's late or early). Here's what they said:
 
-Here’s what they said:
 "${text}"
 
 They have about ${adjustedHours} hours available. Use this to generate a well-paced, realistic timeline that includes hydration, rest, and food if needed.
