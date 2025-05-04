@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mental Dump → Timeline</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f5f5f5;
+      padding: 2rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #2c3e50;
+      font-size: 1.8rem;
+    }
+    textarea, input, button {
+      width: 100%;
+      margin: 0.5rem 0 1rem 0;
+      font-size: 1rem;
+      padding: 0.75rem;
+      border-radius: 0.4rem;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      background: #2c3e50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1a242f;
+    }
+    .output {
+      background: white;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .task {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #eee;
+    }
+    .time {
+      font-weight: bold;
+      color: #2c3e50;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧠 Mental Dump → Timeline</h1>
+  <p>Type everything in your head and how much time you've got. We'll help you sort it into a plan.</p>
+
+  <label for="brainDump">What's in your head?</label>
+  <textarea id="brainDump" rows="6" placeholder="e.g. Email Steph, take out the bins, reply to client, eat something..."></textarea>
+
+  <label for="timeAvailable">How much time do you have? (minutes)</label>
+  <input type="number" id="timeAvailable" placeholder="e.g. 45" min="1" />
+
+  <button onclick="generateTimeline()">Make My Plan</button>
+
+  <div class="output" id="output"></div>
+
+  <script>
+    function generateTimeline() {
+      const input = document.getElementById("brainDump").value;
+      const time = parseInt(document.getElementById("timeAvailable").value, 10);
+      const output = document.getElementById("output");
+
+      if (!input.trim() || !time || time <= 0) {
+        output.innerHTML = "<p>Please fill in both fields properly.</p>";
+        return;
+      }
+
+      const tasks = input
+        .split(/[\n,•-]+/)
+        .map(t => t.trim())
+        .filter(t => t.length > 0);
+
+      const timePerTask = Math.floor(time / tasks.length);
+      const leftover = time % tasks.length;
+
+      let html = "<h2>Your Plan:</h2>";
+      tasks.forEach((task, index) => {
+        const taskTime = timePerTask + (index < leftover ? 1 : 0); // distribute leftover time
+        html += `<div class="task"><span class="time">${taskTime} min:</span> ${task}</div>`;
+      });
+
+      output.innerHTML = html;
+    }
+  </script>
+
+</body>
+</html>
