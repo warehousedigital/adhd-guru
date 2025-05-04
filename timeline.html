@@ -12,7 +12,10 @@
       max-width: 700px;
       margin: 0 auto;
     }
-    h1 { color: #2c3e50; font-size: 1.8rem; }
+    h1 {
+      color: #2c3e50;
+      font-size: 1.8rem;
+    }
     textarea, input, select, button {
       width: 100%;
       margin: 0.5rem 0 1rem 0;
@@ -34,9 +37,19 @@
     .inline {
       display: flex;
       gap: 0.5rem;
+      align-items: center;
     }
-    .inline input {
+    .inline input[type="number"] {
+      flex: 2;
+      min-width: 120px;
+    }
+    .inline select {
       flex: 1;
+      min-width: 120px;
+    }
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      margin: 0;
     }
     .output {
       background: white;
@@ -54,10 +67,10 @@
 <body>
 
   <h1>🧠 Mental Dump → Timeline (AI-Powered)</h1>
-  <p>Tell me everything you need to do and how you're feeling. Then enter the time you’ve got, and I’ll help you plan what to do and in what order.</p>
+  <p>Tell me everything you need to do and how you're feeling. Then enter the time you’ve got, and I’ll help you plan what to do — in what order — with honesty, kindness, and a bit of tough love.</p>
 
   <label for="freeform">What’s on your mind?</label>
-  <textarea id="freeform" rows="7" placeholder="e.g. I need to respond to emails, clean the kitchen, call my mum, and I'm really burned out. I have 3 hours but I keep putting everything off. The emails are most urgent. I keep forgetting to eat."></textarea>
+  <textarea id="freeform" rows="7" placeholder="e.g. I need to finish edits, clean the kitchen, email Jo, and I'm really burned out. I have 3 hours but I keep putting everything off. The video edits are most urgent. I keep forgetting food."></textarea>
 
   <label>How much time do you have?</label>
   <div class="inline">
@@ -91,12 +104,12 @@
       } else if (unit === "hours") {
         adjustedHours = parseFloat(amount);
       } else if (unit === "days") {
-        adjustedHours = parseFloat(amount) * 8; // Treat 1 day as 8 hours of potential work
+        adjustedHours = parseFloat(amount) * 8; // 1 day = 8 hours of work time
       }
 
       const prompt = `
-You are a task planning assistant helping someone with ADHD and/or executive dysfunction. 
-You are kind, supportive, but firm. You do not guess or make assumptions. 
+You are a task planning assistant helping someone with ADHD and executive dysfunction. 
+You are kind, supportive, but firm. You do not guess or make vague assumptions. 
 Be honest, direct, and specific. The user has provided the following unstructured input:
 
 "${text}"
