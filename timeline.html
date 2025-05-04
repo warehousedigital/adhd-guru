@@ -173,14 +173,15 @@ Use markdown formatting: headings (#), bold (**bold**), and lists. Respond in cl
         document.getElementById("initialInputs").classList.add("faded");
       }
 
+      const responseNumber = promptHistory.length + 1;
       const container = document.createElement("details");
       container.className = "output";
       container.open = true;
-      container.innerHTML = `<summary>🧾 New Timeline Response</summary><div class='spinner'></div><p class='loading'>${fromFollowUp ? 'Reviewing your response…' : 'Thinking… building your timeline…'}</p>`;
-      responsesDiv.prepend(container);
+      container.innerHTML = `<summary>📄 Response ${responseNumber}</summary><div class='spinner'></div><p class='loading'>${fromFollowUp ? 'Reviewing your response…' : 'Thinking… building your timeline…'}</p>`;
+      responsesDiv.appendChild(container);
 
       try {
-        const response = await fetch("https://shy-poetry-c035.peter-775.workers.dev", {
+        const response = await fetch("https://your-worker-name.yourusername.workers.dev", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ input: prompt })
@@ -212,7 +213,7 @@ Use markdown formatting: headings (#), bold (**bold**), and lists. Respond in cl
         responseBox.appendChild(followTextarea);
         responseBox.appendChild(sendBtn);
 
-        container.innerHTML = `<summary>🧾 New Timeline Response</summary>`;
+        container.innerHTML = `<summary>📄 Response ${responseNumber}</summary>`;
         container.appendChild(newReply);
         container.appendChild(responseBox);
 
