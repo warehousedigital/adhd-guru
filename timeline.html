@@ -188,36 +188,48 @@
       color: #ff6b6b;
     }
   </style>
-<style id="theme-style">
+<style>
   body {
     font-family: sans-serif;
     background-color: #1e1e1e;
-    color: #f0f0f0;
+    color: #e0e0e0;
   }
   textarea, input, select, button {
-    background-color: #2a2a2a;
+    background-color: #2b2b2b;
     color: #f0f0f0;
-    border: 1px solid #444;
+    border: 1px solid #555;
   }
   .intro, .char-count, label, summary {
-    color: #ccc;
+    color: #cccccc;
   }
   button {
-    background-color: #3b3b3b;
-    color: #fff;
+    background-color: #3c3c3c;
+    color: #ffffff;
   }
   button:hover:enabled {
-    background-color: #555;
+    background-color: #555555;
   }
   .output {
-    background: #2e2e2e;
+    background: #2a2a2a;
+    color: #f0f0f0;
+  }
+  .output h1, .output h2, .output h3 {
+    color: #ffdc91;
+  }
+  .output p {
+    color: #dddddd;
+    margin: 0.25rem 0;
+  }
+  .output ul, .output ol {
+    margin: 0.25rem 0 0.5rem 1.5rem;
+    padding-left: 1rem;
   }
   .spinner {
     border: 4px solid #333;
     border-top: 4px solid #f0f0f0;
   }
   .controls button {
-    color: #ccc;
+    color: #cccccc;
   }
   .error {
     color: #ff6b6b;
@@ -299,8 +311,7 @@
   }
 </script>
 </head>
-<body data-theme="dark">
-<button onclick="toggleTheme()" style="position:fixed;top:1rem;right:1rem;z-index:999;background:#444;color:white;border:none;padding:0.4rem 0.6rem;border-radius:5px;cursor:pointer;">Toggle Theme</button>
+<body>
 
   <h1>🧠 Mental Dump → Timeline</h1>
   <p class="intro">Feeling overwhelmed? This tool turns everything in your head into a clear, time-based plan that actually works for you. The more detail you give – tasks, worries, priorities – the better it can shape a plan that fits.</p>
