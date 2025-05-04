@@ -125,6 +125,21 @@
       opacity: 0.6;
       pointer-events: none;
     }
+  details[open] > summary::after {
+      content: "▲";
+      float: right;
+    }
+    details > summary::after {
+      content: "▼";
+      float: right;
+    }
+    details[open] > *:not(summary) {
+      animation: fadeOut 0.3s ease-in-out;
+    }
+    @keyframes fadeOut {
+      0% { opacity: 0; max-height: 0; }
+      100% { opacity: 1; max-height: 1000px; }
+    }
   </style>
 </head>
 <body>
@@ -209,7 +224,7 @@
       responsesDiv.appendChild(container);
 
       try {
-        const response = await fetch("https://shy-poetry-c035.peter-775.workers.dev", {
+        const response = await fetch("https://your-worker-name.yourusername.workers.dev", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ input: prompt })
@@ -240,6 +255,8 @@
             followTextarea.disabled = true;
             sendBtn.disabled = true;
             hasFollowedUp = true;
+            const parentSection = sendBtn.closest("details");
+            if (parentSection) parentSection.open = false;
             submitToAI(followTextarea.value.trim(), true, sendBtn);
           };
           container.appendChild(followTextarea);
