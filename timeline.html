@@ -166,11 +166,9 @@ They have about ${adjustedHours} hours available. Use this to generate a well-pa
 
 Use markdown formatting: headings (#), bold (**bold**), and lists. Respond in clear, encouraging language.`;
 
-      if (fromFollowUp && triggerEl) {
-        const parentSection = triggerEl.closest("details");
-        if (parentSection) parentSection.open = false;
-      } else {
+      if (!fromFollowUp) {
         document.getElementById("initialInputs").classList.add("faded");
+        document.getElementById("inputDetails").open = false;
       }
 
       const responseNumber = promptHistory.length + 1;
@@ -181,7 +179,7 @@ Use markdown formatting: headings (#), bold (**bold**), and lists. Respond in cl
       responsesDiv.appendChild(container);
 
       try {
-        const response = await fetch("https://shy-poetry-c035.peter-775.workers.dev", {
+        const response = await fetch("https://your-worker-name.yourusername.workers.dev", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ input: prompt })
@@ -200,22 +198,16 @@ Use markdown formatting: headings (#), bold (**bold**), and lists. Respond in cl
         const newReply = document.createElement("div");
         newReply.innerHTML = `${controls}${formatted}`;
 
-        const responseBox = document.createElement("div");
-        const followTextarea = document.createElement("textarea");
-        const sendBtn = document.createElement("button");
-        followTextarea.rows = 3;
-        sendBtn.textContent = "Send Response";
-        sendBtn.onclick = () => {
-          followTextarea.disabled = true;
-          sendBtn.disabled = true;
-          submitToAI(followTextarea.value.trim(), true, sendBtn);
-        };
-        responseBox.appendChild(followTextarea);
-        responseBox.appendChild(sendBtn);
-
         container.innerHTML = `<summary>📄 Response ${responseNumber}</summary>`;
         container.appendChild(newReply);
-        container.appendChild(responseBox);
+
+        if (responseNumber === 1) {
+          const followupMsg = document.createElement("p");
+          followupMsg.style.marginTop = "1rem";
+          followupMsg.style.fontStyle = "italic";
+          followupMsg.textContent = "Plans are currently limited to 1 response.";
+          container.appendChild(followupMsg);
+        }
 
       } catch (err) {
         container.innerHTML = `<summary>Error</summary><p class='error'>Error: ${err.message}. Please try again or check your internet connection.</p>`;
