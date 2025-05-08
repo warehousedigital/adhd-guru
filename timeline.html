@@ -376,12 +376,30 @@
       else if (unit === "hours") adjustedHours = parseFloat(amount);
       else if (unit === "days") adjustedHours = parseFloat(amount) * 8;
 
+      const now = new Date();
+      const localTimeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const localDateString = now.toLocaleDateString([], { weekday: 'long' });
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const locale = navigator.language || 'en-GB';
+      const userTimeInfo = `User info: Local time is approximately ${localTimeString} on ${localDateString}. Timezone - ${timezone}, Locale - ${locale}`;
 
       const prompt = followUpText
-        ? `The user has replied to your previous plan with: "${followUpText}". Re-plan accordingly with the new information. This is your final response, so please wrap up with something supportive like: 'I really hope this helps you keep moving forward. Feel free to come back again for more scheduling support!'.\n\nUser info: Timezone - ${timezone}, Locale - ${locale}`
-        : `You are a task planning assistant helping someone with ADHD and executive dysfunction. Be kind, encouraging and understanding, but not overly sweet or jokey. Speak plainly and helpfully, as if from someone grounded and empathetic. Use UK spelling and grammar.\n\nHere's what they said:\n\n"${text}"\n\nThey have about ${adjustedHours} hours available. Use this to generate a well-paced, realistic timeline that includes hydration, rest, and food if needed.\n\nUser info: Timezone - ${timezone}, Locale - ${locale}\n\nUse markdown formatting: headings (#), bold (**bold**), and lists. Respond in clear, encouraging language.`;
+        ? `The user has replied to your previous plan with: "${followUpText}". Re-plan accordingly with the new information. This is your final response, so please wrap up with something supportive like: 'I really hope this helps you keep moving forward. Feel free to come back again for more scheduling support!'.
+
+${userTimeInfo}`
+        : `You are a task planning assistant helping someone with ADHD and executive dysfunction. Be kind, encouraging and understanding, but not overly sweet or jokey. Speak plainly and helpfully, as if from someone grounded and empathetic. Use UK spelling and grammar.
+
+Here's what they said:
+
+"${text}"
+
+They have about ${adjustedHours} hours available. Use this to generate a well-paced, realistic timeline that includes hydration, rest, and food if needed.
+
+User info: Timezone - ${timezone}, Locale - ${locale}
+
+${userTimeInfo}
+
+Use markdown formatting: headings (#), bold (**bold**), and lists. Respond in clear, encouraging language.`;
 
       if (!fromFollowUp) {
         document.getElementById("initialInputs").classList.add("faded");
@@ -447,13 +465,30 @@
     }
 
     function copyText(btn) {
-      const text = btn.closest(".output").innerText;
-      navigator.clipboard.writeText(text);
-    }
+  const text = btn.closest(".output").innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const note = document.createElement("span");
+    note.textContent = "Copied to clipboard!";
+    note.style.marginLeft = "0.5rem";
+    note.style.color = "#90ee90";
+    btn.parentNode.appendChild(note);
+    setTimeout(() => note.remove(), 2000);
+  });
+}
 
     function downloadText(btn) {
-      const text = btn.closest(".output").innerText;
-      const blob = new Blob([text], { type: "text/plain" });
+  const text = btn.closest(".output").innerText;
+  const blob = new Blob([text], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("en-GB").replace(/\//g, "-");
+  const timeStr = now.toTimeString().slice(0,5).replace(":", "-");
+  a.download = `My Timeline ${dateStr} ${timeStr}.txt`;
+  a.href = url;
+  a.click();
+  URL.revokeObjectURL(url);
+});
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
