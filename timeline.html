@@ -236,16 +236,7 @@
   }
 </style>
 <script>
-  function toggleTheme() {
-    const styleTag = document.getElementById('theme-style');
-    const isDark = document.body.dataset.theme === 'dark';
-    document.body.dataset.theme = isDark ? 'light' : 'dark';
-    styleTag.innerHTML = isDark ? `
-      body {
-        font-family: sans-serif;
-        background-color: #f5f5f5;
-        color: #111;
-      }
+  
       textarea, input, select, button {
         background-color: #fff;
         color: #111;
@@ -479,6 +470,16 @@ Use markdown formatting: headings (#), bold (**bold**), and lists. Respond in cl
     function downloadText(btn) {
   const text = btn.closest(".output").innerText;
   const blob = new Blob([text], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("en-GB").replace(/\//g, "-");
+  const timeStr = now.toTimeString().slice(0, 5).replace(":", "-");
+  a.download = `My Timeline ${dateStr} ${timeStr}.txt`;
+  a.href = url;
+  a.click();
+  URL.revokeObjectURL(url);
+});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   const now = new Date();
