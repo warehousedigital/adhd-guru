@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Timecode Marker</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #1e1e1e;
+      color: #f0f0f0;
+      padding: 2rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #f8f8f8;
+      font-size: 1.8rem;
+    }
+    .intro {
+      margin: 1rem 0;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #ccc;
+    }
+    textarea, input, select, button {
+      width: 100%;
+      margin: 0.5rem 0 1rem 0;
+      font-size: 1rem;
+      padding: 0.5rem;
+      border-radius: 0.4rem;
+      border: 1px solid #444;
+      background-color: #2a2a2a;
+      color: #f0f0f0;
+      box-sizing: border-box;
+      line-height: 1.4;
+    }
+    button {
+      background: #3b3b3b;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover:enabled {
+      background: #555;
+    }
+    button:disabled {
+      background: #999;
+      cursor: not-allowed;
+    }
+    .output {
+      background: #2e2e2e;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      white-space: pre-wrap;
+      margin-top: 1rem;
+      position: relative;
+    }
+    .controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .time-display {
+      font-size: 2rem;
+      text-align: center;
+      margin: 1rem 0;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <h1>⏱️ Timecode Marker</h1>
+  <p class="intro">Press "Go" to start the timer. Use "Mark" to save timecodes. When you're done, "Stop and Save" to copy or download the list.</p>
+
+  <div class="time-display" id="timeDisplay">00:00:00.000</div>
+
+  <button id="startButton">Go</button>
+  <button id="markButton" disabled>Mark</button>
+  <button id="stopButton" disabled>Stop and Save</button>
+
+  <div id="outputContainer" class="output" style="display:none;"></div>
+
+  <div id="saveControls" class="controls" style="display:none;">
+    <button onclick="copyTimecodes()">📋 Copy</button>
+    <button onclick="downloadTimecodes()">💾 Download</button>
+  </div>
+
+  <script>
+    let startTime, timerInterval, timecodes = [];
+
+    const timeDisplay = document.getElementById("timeDisplay");
+    const outputContainer = document.getElementById("outputContainer");
+    const saveControls = document.getElementById("saveControls");
+
+    function formatTime(ms) {
+      const totalSeconds = Math.floor(ms / 1000);
+      const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+      const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+      const s = String(totalSeconds % 60).padStart(2, '0');
+      const msStr = String(ms % 1000).padStart(3, '0');
+      return `${h}:${m}:${s}.${msStr}`;
+    }
+
+    document.getElementById("startButton").onclick = () => {
+      startTime = Date.now();
+      timecodes = [];
+      document.getElementById("startButton").disabled = true;
+      document.getElementById("markButton").disabled = false;
+      document.getElementById("stopButton").disabled = false;
+      outputContainer.style.display = "none";
+      saveControls.style.display = "none";
+
+      timerInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        timeDisplay.textContent = formatTime(elapsed);
+      }, 31); // Smooth update
+    };
+
+    document.getElementById("markButton").onclick = () => {
+      const now = Date.now();
+      timecodes.push(formatTime(now - startTime));
+    };
+
+    document.getElementById("stopButton").onclick = () => {
+      clearInterval(timerInterval);
+      document.getElementById("startButton").disabled = false;
+      document.getElementById("markButton").disabled = true;
+      document.getElementById("stopButton").disabled = true;
+
+      if (timecodes.length === 0) {
+        outputContainer.style.display = "block";
+        outputContainer.textContent = "No timecodes were marked.";
+        saveControls.style.display = "none";
+        return;
+      }
+
+      const outputText = timecodes.join("\n");
+      outputContainer.style.display = "block";
+      outputContainer.textContent = outputText;
+      saveControls.style.display = "flex";
+    };
+
+    function copyTimecodes() {
+      navigator.clipboard.writeText(outputContainer.textContent).then(() => {
+        alert("Copied to clipboard!");
+      });
+    }
+
+    function downloadTimecodes() {
+      const blob = new Blob([outputContainer.textContent], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const now = new Date();
+      a.download = `Timecodes-${now.toISOString().slice(0,19).replace(/T|:/g, "-")}.txt`;
+      a.href = url;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
