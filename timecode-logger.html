@@ -16,7 +16,7 @@
     h1 {
       text-align: center;
     }
-    select, button, textarea {
+    select, button, textarea, input {
       width: 100%;
       margin: 0.5rem 0;
       padding: 0.5rem;
@@ -33,7 +33,9 @@
     }
     #markers {
       height: 150px;
+      width: 100%;
       white-space: pre;
+      overflow-y: auto;
     }
     .controls {
       display: flex;
@@ -46,15 +48,62 @@
       margin-top: 0.5rem;
       display: none;
     }
+    .timecode-picker {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .timecode-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .timecode-block button {
+      width: 2rem;
+      height: 2rem;
+    }
+    .timecode-input {
+      width: 3rem;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
   <h1>Timecode Logger</h1>
-  <label for="startTimecode">Starting Timecode:</label>
-  <select id="startTimecode">
-    <option value="00:00:00:00" selected>00:00:00:00</option>
-    <option value="01:00:00:00">01:00:00:00</option>
-    <option value="10:00:00:00">10:00:00:00</option>
+
+  <label>Starting Timecode:</label>
+  <div class="timecode-picker">
+    <div class="timecode-block">
+      <button class="plus" data-field="hh">+</button>
+      <input type="text" id="hh" class="timecode-input" value="00" readonly>
+      <button class="minus" data-field="hh">-</button>
+    </div>
+    <div class="timecode-block">
+      <button class="plus" data-field="mm">+</button>
+      <input type="text" id="mm" class="timecode-input" value="00" readonly>
+      <button class="minus" data-field="mm">-</button>
+    </div>
+    <div class="timecode-block">
+      <button class="plus" data-field="ss">+</button>
+      <input type="text" id="ss" class="timecode-input" value="00" readonly>
+      <button class="minus" data-field="ss">-</button>
+    </div>
+    <div class="timecode-block">
+      <button class="plus" data-field="ff">+</button>
+      <input type="text" id="ff" class="timecode-input" value="00" readonly>
+      <button class="minus" data-field="ff">-</button>
+    </div>
+  </div>
+
+  <label for="frameRate">Frame Rate:</label>
+  <select id="frameRate">
+    <option value="24">24 fps</option>
+    <option value="25" selected>25 fps</option>
+    <option value="29.97">29.97 fps</option>
+    <option value="30">30 fps</option>
+    <option value="50">50 fps</option>
+    <option value="59.94">59.94 fps</option>
+    <option value="60">60 fps</option>
   </select>
 
   <div id="timeDisplay">00:00:00:00</div>
@@ -78,27 +127,29 @@
     let frames = 0;
     let running = false;
     let paused = false;
+    let fps = 25;
 
-    const frameRate = 25; // Assume 25fps
     const display = document.getElementById("timeDisplay");
     const markers = document.getElementById("markers");
     const startStopBtn = document.getElementById("startStopBtn");
     const pauseResumeBtn = document.getElementById("pauseResumeBtn");
     const markBtn = document.getElementById("markBtn");
     const feedback = document.getElementById("feedback");
-    const startTimecodeSelect = document.getElementById("startTimecode");
 
-    function parseTimecode(tc) {
-      const parts = tc.split(":").map(Number);
-      return ((parts[0]*3600 + parts[1]*60 + parts[2]) * frameRate + parts[3]);
+    function getStartTimecode() {
+      const hh = parseInt(document.getElementById("hh").value);
+      const mm = parseInt(document.getElementById("mm").value);
+      const ss = parseInt(document.getElementById("ss").value);
+      const ff = parseInt(document.getElementById("ff").value);
+      return ((hh * 3600 + mm * 60 + ss) * fps + ff);
     }
 
     function formatTimecode(f) {
-      const totalSeconds = Math.floor(f / frameRate);
+      const totalSeconds = Math.floor(f / fps);
       const hh = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
       const mm = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
       const ss = String(totalSeconds % 60).padStart(2, '0');
-      const ff = String(f % frameRate).padStart(2, '0');
+      const ff = String(Math.floor(f % fps)).padStart(2, '0');
       return `${hh}:${mm}:${ss}:${ff}`;
     }
 
@@ -110,7 +161,7 @@
       interval = setInterval(() => {
         frames++;
         updateDisplay();
-      }, 1000 / frameRate);
+      }, 1000 / fps);
     }
 
     function stopCounting() {
@@ -120,7 +171,8 @@
 
     startStopBtn.onclick = () => {
       if (!running) {
-        frames = parseTimecode(startTimecodeSelect.value);
+        fps = parseFloat(document.getElementById("frameRate").value);
+        frames = getStartTimecode();
         updateDisplay();
         startCounting();
         running = true;
@@ -130,7 +182,7 @@
         markBtn.disabled = false;
       } else {
         stopCounting();
-        display.textContent = startTimecodeSelect.value;
+        updateDisplay();
         running = false;
         paused = false;
         startStopBtn.textContent = "Start";
@@ -154,7 +206,9 @@
     };
 
     markBtn.onclick = () => {
-      markers.value += formatTimecode(frames) + "\n";
+      const timecode = formatTimecode(frames);
+      markers.value += timecode + "\n";
+      markers.scrollTop = markers.scrollHeight;
     };
 
     document.getElementById("copyBtn").onclick = () => {
@@ -175,6 +229,37 @@
       a.click();
       URL.revokeObjectURL(a.href);
     };
+
+    function adjustValue(field, direction, fast = false) {
+      const input = document.getElementById(field);
+      let value = parseInt(input.value);
+      value += direction * (fast ? 5 : 1);
+      if (value < 0) value = 0;
+      if (value > 99) value = 99;
+      input.value = String(value).padStart(2, '0');
+    }
+
+    document.querySelectorAll(".plus").forEach(btn => {
+      btn.onmousedown = (e) => {
+        const field = btn.dataset.field;
+        let fast = false;
+        const interval = setInterval(() => adjustValue(field, 1, fast), 100);
+        btn.onmouseup = () => clearInterval(interval);
+        btn.onmouseleave = () => clearInterval(interval);
+        setTimeout(() => fast = true, 500);
+      };
+    });
+
+    document.querySelectorAll(".minus").forEach(btn => {
+      btn.onmousedown = (e) => {
+        const field = btn.dataset.field;
+        let fast = false;
+        const interval = setInterval(() => adjustValue(field, -1, fast), 100);
+        btn.onmouseup = () => clearInterval(interval);
+        btn.onmouseleave = () => clearInterval(interval);
+        setTimeout(() => fast = true, 500);
+      };
+    });
   </script>
 </body>
 </html>
