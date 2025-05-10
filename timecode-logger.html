@@ -9,9 +9,9 @@
       font-family: sans-serif;
       background-color: #1e1e1e;
       color: #f0f0f0;
-      padding: 2rem;
       max-width: 600px;
       margin: 0 auto;
+      padding: 2rem;
     }
     h1 {
       text-align: center;
@@ -21,125 +21,159 @@
       margin: 0.5rem 0;
       padding: 0.5rem;
       font-size: 1rem;
-      border-radius: 5px;
-      border: 1px solid #555;
+      border-radius: 0.4rem;
+      border: 1px solid #444;
       background-color: #2a2a2a;
       color: #f0f0f0;
     }
-    .button-row {
+    #timeDisplay {
+      font-size: 2rem;
+      text-align: center;
+      margin: 1rem 0;
+    }
+    #markers {
+      height: 150px;
+      white-space: pre;
+    }
+    .controls {
       display: flex;
       gap: 0.5rem;
+      justify-content: space-between;
     }
-    .button-row button {
-      flex: 1;
-    }
-    ul {
-      list-style: none;
-      padding-left: 0;
-    }
-    li {
-      padding: 0.2rem 0;
+    .feedback {
+      text-align: center;
+      color: lightgreen;
+      margin-top: 0.5rem;
+      display: none;
     }
   </style>
 </head>
 <body>
   <h1>Timecode Logger</h1>
-
-  <label for="startTimecode">Start Timecode</label>
+  <label for="startTimecode">Starting Timecode:</label>
   <select id="startTimecode">
-    <option value="00:00:00:00">00:00:00:00</option>
+    <option value="00:00:00:00" selected>00:00:00:00</option>
     <option value="01:00:00:00">01:00:00:00</option>
     <option value="10:00:00:00">10:00:00:00</option>
   </select>
 
-  <div class="button-row">
-    <button id="start">Start</button>
-    <button id="pause">Pause</button>
-    <button id="stop">Stop</button>
-  </div>
-  <button id="mark">Mark</button>
+  <div id="timeDisplay">00:00:00:00</div>
 
-  <h2>Markers</h2>
-  <ul id="markerList"></ul>
-
-  <div id="finalOptions" style="display: none;">
-    <button id="copy">Copy to Clipboard</button>
-    <button id="save">Save as .txt</button>
+  <div class="controls">
+    <button id="startStopBtn">Start</button>
+    <button id="pauseResumeBtn" disabled>Pause</button>
+    <button id="markBtn" disabled>Mark</button>
   </div>
+
+  <textarea id="markers" readonly placeholder="Marked timecodes will appear here..."></textarea>
+
+  <div class="controls">
+    <button id="copyBtn" style="display:none;">Copy</button>
+    <button id="saveBtn" style="display:none;">Save</button>
+  </div>
+  <div class="feedback" id="feedback">Copied to clipboard!</div>
 
   <script>
-    let timer = null;
-    let currentFrames = 0;
-    let isRunning = false;
-    const fps = 25;
-    const markers = [];
+    let interval = null;
+    let frames = 0;
+    let running = false;
+    let paused = false;
 
-    function parseTimecode(timecode) {
-      const [hh, mm, ss, ff] = timecode.split(":").map(t => parseInt(t, 10));
-      return ((hh * 3600 + mm * 60 + ss) * fps + ff);
+    const frameRate = 25; // Assume 25fps
+    const display = document.getElementById("timeDisplay");
+    const markers = document.getElementById("markers");
+    const startStopBtn = document.getElementById("startStopBtn");
+    const pauseResumeBtn = document.getElementById("pauseResumeBtn");
+    const markBtn = document.getElementById("markBtn");
+    const feedback = document.getElementById("feedback");
+    const startTimecodeSelect = document.getElementById("startTimecode");
+
+    function parseTimecode(tc) {
+      const parts = tc.split(":").map(Number);
+      return ((parts[0]*3600 + parts[1]*60 + parts[2]) * frameRate + parts[3]);
     }
 
-    function formatTimecode(frames) {
-      const totalSeconds = Math.floor(frames / fps);
-      const ff = frames % fps;
-      const ss = totalSeconds % 60;
-      const mm = Math.floor((totalSeconds / 60)) % 60;
-      const hh = Math.floor(totalSeconds / 3600);
-      return `${pad(hh)}:${pad(mm)}:${pad(ss)}:${pad(ff)}`;
+    function formatTimecode(f) {
+      const totalSeconds = Math.floor(f / frameRate);
+      const hh = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+      const mm = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+      const ss = String(totalSeconds % 60).padStart(2, '0');
+      const ff = String(f % frameRate).padStart(2, '0');
+      return `${hh}:${mm}:${ss}:${ff}`;
     }
 
-    function pad(n) {
-      return n.toString().padStart(2, '0');
+    function updateDisplay() {
+      display.textContent = formatTimecode(frames);
     }
 
-    function updateTime() {
-      if (isRunning) {
-        currentFrames++;
+    function startCounting() {
+      interval = setInterval(() => {
+        frames++;
+        updateDisplay();
+      }, 1000 / frameRate);
+    }
+
+    function stopCounting() {
+      clearInterval(interval);
+      interval = null;
+    }
+
+    startStopBtn.onclick = () => {
+      if (!running) {
+        frames = parseTimecode(startTimecodeSelect.value);
+        updateDisplay();
+        startCounting();
+        running = true;
+        paused = false;
+        startStopBtn.textContent = "Stop";
+        pauseResumeBtn.disabled = false;
+        markBtn.disabled = false;
+      } else {
+        stopCounting();
+        display.textContent = startTimecodeSelect.value;
+        running = false;
+        paused = false;
+        startStopBtn.textContent = "Start";
+        pauseResumeBtn.disabled = true;
+        markBtn.disabled = true;
+        document.getElementById("copyBtn").style.display = "inline-block";
+        document.getElementById("saveBtn").style.display = "inline-block";
       }
-    }
-
-    document.getElementById("start").onclick = () => {
-      currentFrames = parseTimecode(document.getElementById("startTimecode").value);
-      isRunning = true;
-      timer = setInterval(updateTime, 1000 / fps);
     };
 
-    document.getElementById("pause").onclick = () => {
-      isRunning = false;
-      clearInterval(timer);
+    pauseResumeBtn.onclick = () => {
+      if (paused) {
+        startCounting();
+        pauseResumeBtn.textContent = "Pause";
+        paused = false;
+      } else {
+        stopCounting();
+        pauseResumeBtn.textContent = "Resume";
+        paused = true;
+      }
     };
 
-    document.getElementById("stop").onclick = () => {
-      isRunning = false;
-      clearInterval(timer);
-      document.getElementById("finalOptions").style.display = "block";
+    markBtn.onclick = () => {
+      markers.value += formatTimecode(frames) + "\n";
     };
 
-    document.getElementById("mark").onclick = () => {
-      if (!isRunning) return;
-      const tc = formatTimecode(currentFrames);
-      markers.push(tc);
-      const li = document.createElement("li");
-      li.textContent = tc;
-      document.getElementById("markerList").appendChild(li);
+    document.getElementById("copyBtn").onclick = () => {
+      navigator.clipboard.writeText(markers.value).then(() => {
+        feedback.style.display = "block";
+        setTimeout(() => feedback.style.display = "none", 2000);
+      });
     };
 
-    document.getElementById("copy").onclick = () => {
-      navigator.clipboard.writeText(markers.join("\n"));
-      alert("Copied to clipboard!");
-    };
-
-    document.getElementById("save").onclick = () => {
-      const blob = new Blob([markers.join("\n")], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
+    document.getElementById("saveBtn").onclick = () => {
+      const blob = new Blob([markers.value], { type: "text/plain" });
       const a = document.createElement("a");
       const now = new Date();
-      const name = `Timecode Marker ${now.toLocaleDateString("en-GB").replaceAll('/', '-')}` +
-                   ` ${now.getHours().toString().padStart(2, '0')}-${now.getMinutes().toString().padStart(2, '0')}.txt`;
-      a.href = url;
-      a.download = name;
+      const date = now.toLocaleDateString("en-GB").replaceAll("/", "-");
+      const time = now.toTimeString().slice(0,5).replace(":", "-");
+      a.download = `Timecode Markers - ${date} - ${time}.txt`;
+      a.href = URL.createObjectURL(blob);
       a.click();
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(a.href);
     };
   </script>
 </body>
