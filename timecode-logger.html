@@ -66,6 +66,17 @@
       width: 3rem;
       text-align: center;
     }
+    .indicator-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 1rem 0;
+    }
+    .indicator-toggle label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
   </style>
 </head>
 <body>
@@ -106,6 +117,11 @@
     <option value="60">60 fps</option>
   </select>
 
+  <div class="indicator-toggle">
+    <label><input type="checkbox" id="lightToggle"> Flash on mark</label>
+    <label><input type="checkbox" id="soundToggle"> Sound on mark</label>
+  </div>
+
   <div id="timeDisplay">00:00:00:00</div>
 
   <div class="controls">
@@ -121,6 +137,7 @@
     <button id="saveBtn" style="display:none;">Save</button>
   </div>
   <div class="feedback" id="feedback">Copied to clipboard!</div>
+  <audio id="blipSound" src="https://freesound.org/data/previews/341/341695_5260877-lq.mp3"></audio>
 
   <script>
     let interval = null;
@@ -135,6 +152,9 @@
     const pauseResumeBtn = document.getElementById("pauseResumeBtn");
     const markBtn = document.getElementById("markBtn");
     const feedback = document.getElementById("feedback");
+    const soundToggle = document.getElementById("soundToggle");
+    const lightToggle = document.getElementById("lightToggle");
+    const blip = document.getElementById("blipSound");
 
     function getStartTimecode() {
       const hh = parseInt(document.getElementById("hh").value);
@@ -162,11 +182,13 @@
         frames++;
         updateDisplay();
       }, 1000 / fps);
+      startStopBtn.style.backgroundColor = "green";
     }
 
     function stopCounting() {
       clearInterval(interval);
       interval = null;
+      startStopBtn.style.backgroundColor = "";
     }
 
     startStopBtn.onclick = () => {
@@ -182,6 +204,7 @@
         markBtn.disabled = false;
       } else {
         stopCounting();
+        frames = getStartTimecode();
         updateDisplay();
         running = false;
         paused = false;
@@ -209,6 +232,11 @@
       const timecode = formatTimecode(frames);
       markers.value += timecode + "\n";
       markers.scrollTop = markers.scrollHeight;
+      if (soundToggle.checked) blip.play();
+      if (lightToggle.checked) {
+        document.body.style.backgroundColor = "#444";
+        setTimeout(() => document.body.style.backgroundColor = "#1e1e1e", 100);
+      }
     };
 
     document.getElementById("copyBtn").onclick = () => {
@@ -233,9 +261,10 @@
     function adjustValue(field, direction, fast = false) {
       const input = document.getElementById(field);
       let value = parseInt(input.value);
+      let max = (field === "ff") ? Math.floor(fps - 1) : 59;
       value += direction * (fast ? 5 : 1);
       if (value < 0) value = 0;
-      if (value > 99) value = 99;
+      if (value > max) value = 0;
       input.value = String(value).padStart(2, '0');
     }
 
@@ -259,6 +288,10 @@
         btn.onmouseleave = () => clearInterval(interval);
         setTimeout(() => fast = true, 500);
       };
+    });
+
+    document.getElementById("frameRate").addEventListener("change", () => {
+      fps = parseFloat(document.getElementById("frameRate").value);
     });
   </script>
 </body>
