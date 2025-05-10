@@ -194,134 +194,134 @@
   </audio>
 
   <script>
-    let timerInterval;
-    let running = false;
-    let paused = false;
-    let currentFrame = 0;
+    // Full JS logic enclosed in DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+      let timerInterval;
+      let running = false;
+      let paused = false;
+      let currentFrame = 0;
 
-    const hh = document.getElementById('hh');
-    const mm = document.getElementById('mm');
-    const ss = document.getElementById('ss');
-    const ff = document.getElementById('ff');
-    const frameRate = document.getElementById('frameRate');
-    const timeDisplay = document.getElementById('timeDisplay');
-    const markers = document.getElementById('markers');
-    const blip = document.getElementById('blipSound');
+      const hh = document.getElementById('hh');
+      const mm = document.getElementById('mm');
+      const ss = document.getElementById('ss');
+      const ff = document.getElementById('ff');
+      const frameRate = document.getElementById('frameRate');
+      const timeDisplay = document.getElementById('timeDisplay');
+      const markers = document.getElementById('markers');
+      const blip = document.getElementById('blipSound');
 
-    const updateDisplay = () => {
-      let fps = parseFloat(frameRate.value);
-      let totalFrames = currentFrame;
+      const updateDisplay = () => {
+        let fps = parseFloat(frameRate.value);
+        let totalFrames = currentFrame;
 
-      let hours = Math.floor(totalFrames / (3600 * fps));
-      totalFrames %= 3600 * fps;
-      let minutes = Math.floor(totalFrames / (60 * fps));
-      totalFrames %= 60 * fps;
-      let seconds = Math.floor(totalFrames / fps);
-      let frames = Math.floor(totalFrames % fps);
+        let hours = Math.floor(totalFrames / (3600 * fps));
+        totalFrames %= 3600 * fps;
+        let minutes = Math.floor(totalFrames / (60 * fps));
+        totalFrames %= 60 * fps;
+        let seconds = Math.floor(totalFrames / fps);
+        let frames = Math.floor(totalFrames % fps);
 
-      timeDisplay.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}:${pad(frames)}`;
-    };
+        timeDisplay.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}:${pad(frames)}`;
+      };
 
-    const pad = num => String(num).padStart(2, '0');
+      const pad = num => String(num).padStart(2, '0');
 
-    const startStopBtn = document.getElementById('startStopBtn');
-    const pauseResumeBtn = document.getElementById('pauseResumeBtn');
-    const markBtn = document.getElementById('markBtn');
+      const startStopBtn = document.getElementById('startStopBtn');
+      const pauseResumeBtn = document.getElementById('pauseResumeBtn');
+      const markBtn = document.getElementById('markBtn');
 
-    document.querySelectorAll('.plus, .minus').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const field = document.getElementById(btn.dataset.field);
-        const fps = Math.floor(parseFloat(frameRate.value));
-        let value = parseInt(field.value);
+      document.querySelectorAll('.plus, .minus').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const field = document.getElementById(btn.dataset.field);
+          const fps = Math.floor(parseFloat(frameRate.value));
+          let value = parseInt(field.value);
 
-        if (btn.classList.contains('plus')) {
-          value++;
-        } else {
-          value--;
-        }
+          if (btn.classList.contains('plus')) value++;
+          else value--;
 
-        if (btn.dataset.field === 'ff') {
-          if (value >= fps) value = 0;
-          if (value < 0) value = fps - 1;
-        } else {
-          if (value < 0) value = 59;
-          if (value > 59) value = 0;
-        }
-
-        field.value = pad(value);
-      });
-    });
-
-    startStopBtn.addEventListener('click', () => {
-      if (!running) {
-        const fps = parseFloat(frameRate.value);
-        const base = (parseInt(hh.value) * 3600 + parseInt(mm.value) * 60 + parseInt(ss.value)) * fps + parseInt(ff.value);
-        currentFrame = base;
-        timerInterval = setInterval(() => {
-          if (!paused) {
-            currentFrame++;
-            updateDisplay();
+          if (btn.dataset.field === 'ff') {
+            if (value >= fps) value = 0;
+            if (value < 0) value = fps - 1;
+          } else {
+            if (value < 0) value = 59;
+            if (value > 59) value = 0;
           }
-        }, 1000 / fps);
-        running = true;
-        startStopBtn.textContent = 'Stop';
-        startStopBtn.style.backgroundColor = 'green';
-        pauseResumeBtn.disabled = false;
-        markBtn.disabled = false;
-      } else {
-        clearInterval(timerInterval);
-        running = false;
-        paused = false;
-        currentFrame = 0;
-        updateDisplay();
-        startStopBtn.textContent = 'Start';
-        startStopBtn.style.backgroundColor = '';
-        pauseResumeBtn.disabled = true;
-        markBtn.disabled = true;
-      }
-    });
 
-    pauseResumeBtn.addEventListener('click', () => {
-      paused = !paused;
-      pauseResumeBtn.textContent = paused ? 'Resume' : 'Pause';
-    });
-
-    markBtn.addEventListener('click', () => {
-      const timestamp = timeDisplay.textContent;
-      markers.value += timestamp + '\n';
-      markers.scrollTop = markers.scrollHeight;
-      document.getElementById('copyBtn').style.display = 'inline';
-      document.getElementById('saveBtn').style.display = 'inline';
-
-      if (document.getElementById('lightToggle').checked) {
-        timeDisplay.style.backgroundColor = '#ff0';
-        setTimeout(() => timeDisplay.style.backgroundColor = '', 100);
-      }
-
-      if (document.getElementById('soundToggle').checked) {
-        blip.currentTime = 0;
-        blip.play();
-      }
-    });
-
-    document.getElementById('copyBtn').addEventListener('click', () => {
-      navigator.clipboard.writeText(markers.value).then(() => {
-        const msg = document.getElementById('feedback');
-        msg.style.display = 'block';
-        setTimeout(() => msg.style.display = 'none', 2000);
+          field.value = pad(value);
+        });
       });
-    });
 
-    document.getElementById('saveBtn').addEventListener('click', () => {
-      const blob = new Blob([markers.value], { type: 'text/plain' });
-      const now = new Date();
-      const dateStr = now.toLocaleDateString('en-GB').replaceAll('/', '-');
-      const timeStr = now.toTimeString().slice(0, 5).replace(':', '-');
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `Timecode Markers - ${dateStr} - ${timeStr}.txt`;
-      a.click();
-      URL.revokeObjectURL(a.href);
+      startStopBtn.addEventListener('click', () => {
+        if (!running) {
+          const fps = parseFloat(frameRate.value);
+          const base = (parseInt(hh.value) * 3600 + parseInt(mm.value) * 60 + parseInt(ss.value)) * fps + parseInt(ff.value);
+          currentFrame = base;
+          timerInterval = setInterval(() => {
+            if (!paused) {
+              currentFrame++;
+              updateDisplay();
+            }
+          }, 1000 / fps);
+          running = true;
+          startStopBtn.textContent = 'Stop';
+          startStopBtn.style.backgroundColor = 'green';
+          pauseResumeBtn.disabled = false;
+          markBtn.disabled = false;
+        } else {
+          clearInterval(timerInterval);
+          running = false;
+          paused = false;
+          currentFrame = 0;
+          updateDisplay();
+          startStopBtn.textContent = 'Start';
+          startStopBtn.style.backgroundColor = '';
+          pauseResumeBtn.disabled = true;
+          markBtn.disabled = true;
+        }
+      });
+
+      pauseResumeBtn.addEventListener('click', () => {
+        paused = !paused;
+        pauseResumeBtn.textContent = paused ? 'Resume' : 'Pause';
+      });
+
+      markBtn.addEventListener('click', () => {
+        const timestamp = timeDisplay.textContent;
+        markers.value += timestamp + '\n';
+        markers.scrollTop = markers.scrollHeight;
+        document.getElementById('copyBtn').style.display = 'inline';
+        document.getElementById('saveBtn').style.display = 'inline';
+
+        if (document.getElementById('lightToggle').checked) {
+          timeDisplay.style.backgroundColor = '#ff0';
+          setTimeout(() => timeDisplay.style.backgroundColor = '', 100);
+        }
+
+        if (document.getElementById('soundToggle').checked) {
+          blip.currentTime = 0;
+          blip.play();
+        }
+      });
+
+      document.getElementById('copyBtn').addEventListener('click', () => {
+        navigator.clipboard.writeText(markers.value).then(() => {
+          const msg = document.getElementById('feedback');
+          msg.style.display = 'block';
+          setTimeout(() => msg.style.display = 'none', 2000);
+        });
+      });
+
+      document.getElementById('saveBtn').addEventListener('click', () => {
+        const blob = new Blob([markers.value], { type: 'text/plain' });
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-GB').replaceAll('/', '-');
+        const timeStr = now.toTimeString().slice(0, 5).replace(':', '-');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `Timecode Markers - ${dateStr} - ${timeStr}.txt`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
     });
   </script>
 </body>
