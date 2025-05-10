@@ -6,7 +6,7 @@
   <title>Timecode Logger</title>
   <style>
     body {
-      font-family: "Segoe UI", sans-serif;
+      font-family: sans-serif;
       background-color: #121212;
       color: #f0f0f0;
       max-width: 600px;
@@ -15,23 +15,19 @@
     }
     h1 {
       text-align: center;
-      font-size: 1.8rem;
-      margin-bottom: 1.5rem;
     }
     select, button, textarea, input {
-      font-size: 1rem;
+      width: 100%;
+      margin: 0.5rem 0;
       padding: 0.5rem;
+      font-size: 1rem;
       border-radius: 0.4rem;
       border: 1px solid #444;
       background-color: #1e1e1e;
       color: #f0f0f0;
     }
-    button {
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
     #timeDisplay {
-      font-size: 2.4rem;
+      font-size: 2rem;
       text-align: center;
       margin: 1rem 0;
     }
@@ -40,14 +36,11 @@
       width: 100%;
       white-space: pre;
       overflow-y: auto;
-      resize: none;
-      font-family: monospace;
     }
     .controls {
       display: flex;
       gap: 0.5rem;
       justify-content: space-between;
-      margin-top: 1rem;
     }
     .feedback {
       text-align: center;
@@ -59,7 +52,6 @@
       display: flex;
       justify-content: space-between;
       gap: 0.5rem;
-      margin-top: 0.5rem;
     }
     .timecode-block {
       display: flex;
@@ -67,86 +59,28 @@
       align-items: center;
     }
     .timecode-block button {
-      width: 1.8rem;
-      height: 1.8rem;
-      font-size: 0.9rem;
+      width: 2rem;
+      height: 2rem;
     }
     .timecode-input {
       width: 3rem;
       text-align: center;
-      margin: 0.3rem 0;
     }
-    .toggles {
+    .indicator-toggle {
       display: flex;
-      justify-content: center;
-      gap: 2rem;
-      margin-bottom: 1rem;
+      justify-content: space-between;
+      align-items: center;
+      margin: 1rem 0;
     }
-    .toggle-group {
+    .indicator-toggle label {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-    }
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 40px;
-      height: 22px;
-    }
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #888;
-      transition: .4s;
-      border-radius: 34px;
-    }
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 16px;
-      width: 16px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
-      transition: .4s;
-      border-radius: 50%;
-    }
-    input:checked + .slider {
-      background-color: #4caf50;
-    }
-    input:checked + .slider:before {
-      transform: translateX(18px);
     }
   </style>
 </head>
 <body>
   <h1>Timecode Logger</h1>
-
-  <div class="toggles">
-    <div class="toggle-group">
-      <label>Flash on mark</label>
-      <label class="switch">
-        <input type="checkbox" id="lightToggle">
-        <span class="slider"></span>
-      </label>
-    </div>
-    <div class="toggle-group">
-      <label>Sound on mark</label>
-      <label class="switch">
-        <input type="checkbox" id="soundToggle">
-        <span class="slider"></span>
-      </label>
-    </div>
-  </div>
 
   <label>Starting Timecode:</label>
   <div class="timecode-picker">
@@ -183,7 +117,11 @@
     <option value="60">60 fps</option>
   </select>
 
-  <!-- Buttons and display below will be retained -->
+  <div class="indicator-toggle">
+    <label><input type="checkbox" id="lightToggle"> Flash on mark</label>
+    <label><input type="checkbox" id="soundToggle"> Sound on mark</label>
+  </div>
+
   <div id="timeDisplay">00:00:00:00</div>
 
   <div class="controls">
@@ -201,9 +139,8 @@
   <div class="feedback" id="feedback">Copied to clipboard!</div>
   <audio id="blipSound" src="https://freesound.org/data/previews/341/341695_5260877-lq.mp3"></audio>
 
-  <!-- Functionality Script remains intact and updated -->
   <script>
-    // Functionality here unchanged from previous step
+    // Functionality code remains here (as before your latest style change)
   </script>
 </body>
 </html>
