@@ -261,9 +261,6 @@ if (sessionStorage.getItem("skipRiskCheckOnce") === "true") {
                         It is not a therapy or crisis support tool and should not provide legal, financial, or medical advice.`;
   const userTimeInfo = `User info: Local time is approximately ${localTimeString} on ${localDateString}. Timezone - ${timezone}, Locale - ${locale}`;
 
- const toolPurpose = `This tool helps users who are feeling overwhelmed or anxious to turn their thoughts into a realistic, time-based action plan.
-It is not therapy or crisis support. It should never offer medical, legal, or financial advice.`;
-
 const prompt = `${toolPurpose}
 
 Your job is to help the user move from a mental overload to an achievable, well-paced plan. Be calm, grounded, helpful, and kind. Speak like a real person. Use UK spelling and grammar.
