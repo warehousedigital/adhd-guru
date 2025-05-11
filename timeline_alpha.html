@@ -159,7 +159,34 @@
       </div>
     </div>
   </div>
-  
+  <!-- Floating Support Popup -->
+<div id="supportPopup" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  color: white;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  box-sizing: border-box;
+">
+  <div style="max-width: 600px;">
+    <h2>💬 It sounds like you're going through something really tough.</h2>
+    <p>Please know you're not alone. This tool isn't designed to help in a crisis, but support is available:</p>
+    <ul style="list-style: none; padding: 0; margin: 1rem 0;">
+      <li>📞 <strong>Samaritans (UK)</strong>: 116 123 – free, 24/7</li>
+      <li>📱 <strong>Text "SHOUT" to 85258</strong> – Crisis Text Line</li>
+      <li>🚨 <strong>Call 999</strong> in an emergency</li>
+    </ul>
+    <p>If you feel safe and okay to continue:</p>
+    <button onclick="hideSupportPopup()" style="margin-top: 1rem; padding: 0.75rem 1.5rem; font-size: 1rem;">I'm OK – Show me the plan</button>
+  </div>
+</div>
   <h1>🧠 Overwhelm → Action Converter</h1>
   <p class="intro">Feeling overwhelmed or anxious? This simple tool turns everything you type into a clear, realistic plan based on how much time you have. It’s fast, kind, and built to help you get unstuck.</p>
 
@@ -208,16 +235,58 @@ async function submitToAI() {
     responsesDiv.innerHTML = "<p class='error'>Please enter your thoughts and how much time you have.</p>";
     return;
   }
+  
+ // 🔎 Check for high-risk language
+const riskPhrases = [
+  "suicidal", "kill myself", "want to die", "can’t go on",
+  "ending it all", "give up on life", "overdose", "self harm", "hurt myself"
+];
 
+const inputLower = text.toLowerCase();
+const detectedRisks = riskPhrases.filter(phrase => inputLower.includes(phrase));
+
+if (detectedRisks.length > 0) {
+  document.getElementById("supportPopup").style.display = "flex";
+}
+  
   let adjustedHours = unit === "minutes" ? (parseFloat(amount) / 60) : unit === "days" ? parseFloat(amount) * 8 : parseFloat(amount);
   const now = new Date();
   const localTimeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const localDateString = now.toLocaleDateString([], { weekday: 'long' });
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const locale = navigator.language || 'en-GB';
+  const toolPurpose = `This tool helps users who are feeling overwhelmed or anxious to turn their thoughts into realistic, time-based action plans. 
+                        It is not a therapy or crisis support tool and should not provide legal, financial, or medical advice.`;
   const userTimeInfo = `User info: Local time is approximately ${localTimeString} on ${localDateString}. Timezone - ${timezone}, Locale - ${locale}`;
 
-  const prompt = `You are a task planning assistant helping someone with ADHD and executive dysfunction. Be kind, encouraging and understanding, but not overly sweet or jokey. Speak plainly and helpfully, as if from someone grounded and empathetic. Use UK spelling and grammar.\n\nHere's what they said:\n\n"${text}"\n\nThey have about ${adjustedHours} hours available. Use this to generate a well-paced, realistic timeline that includes hydration, rest, and food if needed.\n\n${userTimeInfo}\n\nUse markdown formatting: headings (#), bold (**bold**), and lists. Respond in clear, encouraging language.`;
+ const toolPurpose = `This tool helps users who are feeling overwhelmed or anxious to turn their thoughts into a realistic, time-based action plan.
+It is not therapy or crisis support. It should never offer medical, legal, or financial advice.`;
+
+const prompt = `${toolPurpose}
+
+Your job is to help the user move from a mental overload to an achievable, well-paced plan. Be calm, grounded, helpful, and kind. Speak like a real person. Use UK spelling and grammar.
+
+They've told us the following:
+
+"${text}"
+
+They said they have around ${amount} ${unit} to work with.
+
+Use the following time guidance:
+- 1 day = 8 working hours
+- 1 week = 5 working days
+- No breaks are included in the time entered
+- Adjust your pacing and ambition based on how the user said they feel
+
+${userTimeInfo}
+
+Format your response as follows:
+1. A short summary of what you understood
+2. A step-by-step action plan using bullet points
+3. A short, kind outro with gentle encouragement or useful suggestions
+
+Use markdown formatting with headings (#), **bold text**, and readable spacing.
+Never include disclaimers, questions, or legal/medical advice.`;
 
   const container = document.createElement("details");
   container.className = "output";
@@ -343,6 +412,9 @@ if (recovered) {
   localStorage.removeItem("recoveredText");
 }
 });
+    function hideSupportPopup() {
+  document.getElementById("supportPopup").style.display = "none";
+}
 
   </script>
 </body>
