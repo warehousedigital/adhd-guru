@@ -233,6 +233,7 @@ async function submitToAI() {
   let msgUpdate2 = setTimeout(() => loadingMsg.textContent = "Just tying up loose ends...", 20000);
   let msgUpdate3 = setTimeout(() => loadingMsg.textContent = "Sorry this is taking so long...", 30000);
   let msgUpdate4 = setTimeout(() => loadingMsg.textContent = "Well this is awkward...", 40000);
+  let msgUpdate5 = setTimeout(() => loadingMsg.textContent = "Oh, I give up...", 55000);
   let timeoutAbort = setTimeout(() => {
     localStorage.setItem("recoveredText", text);
     alert("Something’s gone wrong!\nWe’ve copied your text into a fresh page for you to try again.");
