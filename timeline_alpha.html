@@ -373,19 +373,30 @@ document.getElementById("summaryTime").textContent = `${amount} ${unit}`;
     container.innerHTML = `<summary>📄 Timeline Plan</summary>`;
     container.appendChild(inner);
 
-    const responseBox = document.createElement("textarea");
-    responseBox.rows = 3;
-    responseBox.placeholder = "Have any other questions or want to change some details? Type your response here.";
+const followupWrapper = document.createElement("div");
+followupWrapper.style.marginTop = "1rem";
 
-    const sendBtn = document.createElement("button");
+const responseBox = document.createElement("textarea");
+responseBox.rows = 3;
+responseBox.placeholder = "Have any other questions or want to change some details? Type them here.";
+responseBox.style.width = "100%";
+responseBox.style.marginBottom = "0.5rem";
+
+const sendBtn = document.createElement("button");
+sendBtn.textContent = "Send Response";
+sendBtn.style.display = "block";
+sendBtn.style.marginTop = "0.5rem";
+sendBtn.style.padding = "0.5rem 1rem";
+sendBtn.style.fontSize = "1rem";
 sendBtn.onclick = () => {
   sendBtn.disabled = true;
   responseBox.disabled = true;
   sendFollowupResponse(responseBox.value, container);
 };
 
-    container.appendChild(responseBox);
-    container.appendChild(sendBtn);
+followupWrapper.appendChild(responseBox);
+followupWrapper.appendChild(sendBtn);
+container.appendChild(followupWrapper);
 
   } catch (err) {
     clearTimeout(msgUpdate1);
