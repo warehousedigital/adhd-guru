@@ -244,12 +244,12 @@ const riskPhrases = [
 
 const inputLower = text.toLowerCase();
 
-// 🔐 Only trigger support popup if current user input includes risk phrases
-if (text && text.length > 0) {
+// Only check risk if not a recovered submission
+if (!localStorage.getItem("suppressRiskCheck") && text.length > 0) {
   const detectedRisks = riskPhrases.filter(phrase => text.toLowerCase().includes(phrase));
   if (detectedRisks.length > 0) {
     document.getElementById("supportPopup").style.display = "flex";
-    return; // optional: stop processing further if a support popup is shown
+    return;
   }
 }
   
@@ -409,11 +409,14 @@ Never include disclaimers, questions, or legal/medical advice.`;
     document.getElementById("welcomeModal").style.display = "none";
   }
       
-      const recovered = localStorage.getItem("recoveredText");
+const recovered = localStorage.getItem("recoveredText");
 if (recovered) {
   document.getElementById("freeform").value = recovered;
   document.getElementById("charCount").textContent = `${recovered.length} / 1000`;
   localStorage.removeItem("recoveredText");
+  localStorage.setItem("suppressRiskCheck", "true");
+} else {
+  localStorage.removeItem("suppressRiskCheck");
 }
 });
     function hideSupportPopup() {
