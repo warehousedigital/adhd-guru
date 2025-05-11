@@ -246,7 +246,7 @@ if (sessionStorage.getItem("skipRiskCheckOnce") === "true") {
   const inputLower = text.toLowerCase();
   const detectedRisks = riskPhrases.filter(phrase => inputLower.includes(phrase));
   if (detectedRisks.length > 0) {
-    document.getElementById("supportPopup").style.display = "none";
+    document.getElementById("supportPopup").style.display = "flex";
     return;
   }
 }
@@ -420,6 +420,5 @@ window.addEventListener("DOMContentLoaded", () => {
 
   </script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
-<script src="script.js" defer></script> <!-- if using external file -->
 </body>
 </html>
