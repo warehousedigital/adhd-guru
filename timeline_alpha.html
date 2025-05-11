@@ -245,8 +245,13 @@ const riskPhrases = [
 const inputLower = text.toLowerCase();
 const detectedRisks = riskPhrases.filter(phrase => inputLower.includes(phrase));
 
-if (detectedRisks.length > 0) {
-  document.getElementById("supportPopup").style.display = "flex";
+// 🔐 Only trigger support popup if current user input includes risk phrases
+if (text && text.length > 0) {
+  const detectedRisks = riskPhrases.filter(phrase => text.toLowerCase().includes(phrase));
+  if (detectedRisks.length > 0) {
+    document.getElementById("supportPopup").style.display = "flex";
+    return; // optional: stop processing further if a support popup is shown
+  }
 }
   
   let adjustedHours = unit === "minutes" ? (parseFloat(amount) / 60) : unit === "days" ? parseFloat(amount) * 8 : parseFloat(amount);
