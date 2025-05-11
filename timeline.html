@@ -72,6 +72,17 @@
     .char-count.full {
       color: red;
     }
+    details {
+      margin-top: 1rem;
+      background: #2e2e2e;
+      border-radius: 0.5rem;
+      padding: 1rem;
+    }
+    summary {
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
     .output {
       background: #2e2e2e;
       border-radius: 0.5rem;
@@ -117,7 +128,7 @@
   <h1>🧠 Mental Dump → Timeline</h1>
   <p class="intro">Feeling overwhelmed? This tool turns everything in your head into a clear, time-based plan that actually works for you. The more detail you give – tasks, worries, priorities – the better it can shape a plan that fits.</p>
 
-  <textarea id="freeform" maxlength="1000" rows="7" placeholder="What's on your mind?"></textarea>
+  <textarea id="freeform" maxlength="1000" rows="7" placeholder="Need to book a dentist appointment, reply to at least 3 emails, and finally make a start on that big project. Washing’s piling up. Haven’t exercised in ages — keep saying I’ll go for a run but never do. Kitchen’s a mess and I’ve barely eaten anything proper today. Feeling behind on everything. Not sure how long I’ve got to do all this, but I need to make some progress today."></textarea>
   <div id="charCount" class="char-count">0 / 1000</div>
 
   <label>How much time do you have?</label>
@@ -173,9 +184,10 @@
 
       const prompt = `You are a task planning assistant helping someone with ADHD and executive dysfunction. Be kind, encouraging and understanding, but not overly sweet or jokey. Speak plainly and helpfully, as if from someone grounded and empathetic. Use UK spelling and grammar.\n\nHere's what they said:\n\n"${text}"\n\nThey have about ${adjustedHours} hours available. Use this to generate a well-paced, realistic timeline that includes hydration, rest, and food if needed.\n\n${userTimeInfo}\n\nUse markdown formatting: headings (#), bold (**bold**), and lists. Respond in clear, encouraging language.`;
 
-      const container = document.createElement("div");
+      const container = document.createElement("details");
       container.className = "output";
-      container.innerHTML = `<div class='spinner'></div>`;
+      container.open = true;
+      container.innerHTML = `<summary>📄 Timeline Plan</summary><div class='spinner'></div>`;
       responsesDiv.appendChild(container);
 
       try {
@@ -194,9 +206,28 @@
             <button onclick="downloadText(this)">💾</button>
           </div>
         `;
-        container.innerHTML = `${controls}${formatted}`;
+        const inner = document.createElement("div");
+        inner.innerHTML = `${controls}${formatted}`;
+        container.innerHTML = `<summary>📄 Timeline Plan</summary>`;
+        container.appendChild(inner);
+
+        const responseBox = document.createElement("textarea");
+        responseBox.rows = 3;
+        responseBox.placeholder = "Have any other questions or want to change some details? Type your response here.";
+
+        const sendBtn = document.createElement("button");
+        sendBtn.textContent = "Send Response";
+        sendBtn.onclick = () => {
+          sendBtn.disabled = true;
+          responseBox.disabled = true;
+          container.open = false;
+        };
+
+        container.appendChild(responseBox);
+        container.appendChild(sendBtn);
+
       } catch (err) {
-        container.innerHTML = `<p class='error'>Error: ${err.message}</p>`;
+        container.innerHTML = `<summary>Error</summary><p class='error'>Error: ${err.message}</p>`;
       }
     }
 
