@@ -378,12 +378,11 @@ document.getElementById("summaryTime").textContent = `${amount} ${unit}`;
     responseBox.placeholder = "Have any other questions or want to change some details? Type your response here.";
 
     const sendBtn = document.createElement("button");
-    sendBtn.textContent = "Send Response";
-    sendBtn.onclick = () => {
-      sendBtn.disabled = true;
-      responseBox.disabled = true;
-      container.open = false;
-    };
+sendBtn.onclick = () => {
+  sendBtn.disabled = true;
+  responseBox.disabled = true;
+  sendFollowupResponse(responseBox.value, container);
+};
 
     container.appendChild(responseBox);
     container.appendChild(sendBtn);
