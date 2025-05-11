@@ -391,7 +391,7 @@ Never include disclaimers, questions, or legal/medical advice.`;
       URL.revokeObjectURL(url);
     }
     
-    function handleConsent(agreed) {
+function handleConsent(agreed) {
   if (agreed) {
     localStorage.setItem("userAgreedToTerms", "true");
     document.getElementById("welcomeModal").style.display = "none";
@@ -399,7 +399,7 @@ Never include disclaimers, questions, or legal/medical advice.`;
     window.location.href = "https://www.google.com";
   }
 }
-    
+
 window.addEventListener("DOMContentLoaded", () => {
   const hasAgreed = localStorage.getItem("userAgreedToTerms");
   if (hasAgreed !== "true") {
@@ -413,9 +413,6 @@ window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("freeform").value = recovered;
     document.getElementById("charCount").textContent = `${recovered.length} / 1000`;
     localStorage.removeItem("recoveredText");
-
-    // ✅ Add this line: only suppress risk check ONCE
-    sessionStorage.setItem("skipRiskCheckOnce", "true");
   }
 });
     function hideSupportPopup() {
