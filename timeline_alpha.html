@@ -413,7 +413,8 @@ container.appendChild(followupWrapper);
       navigator.clipboard.writeText(text).then(() => {
         const note = document.createElement("span");
         note.textContent = "Copied to clipboard!";
-        note.style.marginLeft = "0.5rem";
+        note.style.display = "block";
+        note.style.marginTop = "0.25rem";
         note.style.color = "#90ee90";
         btn.parentNode.appendChild(note);
         setTimeout(() => note.remove(), 2000);
@@ -442,6 +443,12 @@ async function sendFollowupResponse(userReply, parentContainer) {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const locale = navigator.language || 'en-GB';
   const userTimeInfo = `Local time is approximately ${localTimeString} on ${localDateString}. Timezone - ${timezone}, Locale - ${locale}.`;
+
+  // Collapse previous plan
+  const previousPlans = document.querySelectorAll(".output details");
+  previousPlans.forEach(d => d.open = false);
+
+  // Create new follow-up container
   const newContainer = document.createElement("details");
   newContainer.className = "output";
   newContainer.open = true;
@@ -450,9 +457,7 @@ async function sendFollowupResponse(userReply, parentContainer) {
     <p id="loadingMsg">Working on your follow-up...</p>`;
   responsesDiv.appendChild(newContainer);
 
-  const spinner = newContainer.querySelector(".spinner");
-
-const followupPrompt = `
+  const followupPrompt = `
 You are continuing a helpful conversation with someone who's overwhelmed. 
 Here is the original plan you gave them:
 
@@ -471,8 +476,8 @@ Use markdown. Format your reply under these rules:
 2. If needed, updated or expanded steps
 3. Encouraging closing remark
 
-Following this response, the user will be unable to followup on anything so don't ask any questions unless they are hyperthetical.
-Wrap up the conversation at the end of this response in a kinda, supportive and encouraging way.
+Following this response, the user will be unable to follow up on anything, so don't ask any questions unless they are hypothetical.
+Wrap up the conversation at the end of this response in a kind, supportive and encouraging way.
 Do NOT reintroduce disclaimers or repeat the original steps unless you’re building on them.`;
 
   try {
@@ -481,13 +486,54 @@ Do NOT reintroduce disclaimers or repeat the original steps unless you’re buil
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ input: followupPrompt })
     });
-
     const data = await response.json();
     const formatted = marked.parse(data.plan);
 
-    newContainer.innerHTML = `<summary>📄 Follow-up Plan</summary>${formatted}`;
+    const controls = `
+      <div class="controls">
+        <button onclick="copyText(this)">📋</button>
+        <button onclick="downloadText(this)">💾</button>
+      </div>
+    `;
+
+    const inner = document.createElement("div");
+    inner.innerHTML = `${controls}${formatted}`;
+
+    // Add restriction message and restart button
+    const footerMsg = document.createElement("div");
+    footerMsg.style.marginTop = "2rem";
+    footerMsg.style.display = "flex";
+    footerMsg.style.justifyContent = "space-between";
+    footerMsg.style.flexWrap = "wrap";
+    footerMsg.style.alignItems = "center";
+
+    const message = document.createElement("p");
+    message.textContent = "🚫 Responses are currently restricted. Please start a new plan request if you need to make further changes.";
+    message.style.marginBottom = "0.5rem";
+
+    const restartBtn = document.createElement("button");
+    restartBtn.textContent = "Start New Plan";
+    restartBtn.style.marginLeft = "auto";
+   restartBtn.onclick = () => {
+  document.getElementById("inputSection").style.display = "block";
+  document.getElementById("inputSummary").style.display = "none";
+  document.getElementById("freeform").value = "";
+  document.getElementById("charCount").textContent = "0 / 1000";
+  document.getElementById("timeAmount").value = "";
+  document.getElementById("timeUnit").value = "minutes";
+  document.getElementById("responses").innerHTML = "";
+  window.latestAIPlan = null;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+    footerMsg.appendChild(message);
+    footerMsg.appendChild(restartBtn);
+
+    newContainer.innerHTML = `<summary>📄 Follow-up Plan</summary>`;
+    newContainer.appendChild(inner);
+    newContainer.appendChild(footerMsg);
   } catch (err) {
-    newContainer.innerHTML = `<summary>Error</summary><p class='error'>Follow-up failed: ${err.message}</p>`;
+    newContainer.innerHTML = `<summary>Error</summary><p class='error'>Error: ${err.message}</p>`;
   }
 }
     
