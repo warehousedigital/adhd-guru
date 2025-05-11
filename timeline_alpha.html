@@ -122,6 +122,17 @@
     .error {
       color: #ff6b6b;
     }
+      .error {
+    color: #ff6b6b;
+  }
+
+  /* 👇 Add this at the very end */
+  #loadingMsg {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: #ccc;
+  }
   </style>
 </head>
 <body>
@@ -211,7 +222,21 @@
       const container = document.createElement("details");
       container.className = "output";
       container.open = true;
-      container.innerHTML = `<summary>📄 Timeline Plan</summary><div class='spinner'></div>`;
+      const spinnerId = `spinner-${Date.now()}`;
+      container.innerHTML = `<summary>📄 Timeline Plan</summary>
+      <div id="${spinnerId}" class='spinner'></div>
+      <p id="loadingMsg">Generating your action plan...</p>`;
+      
+      const loadingMsg = document.getElementById("loadingMsg");
+      let timeoutAbort, msgUpdate1, msgUpdate2;
+    msgUpdate1 = setTimeout(() => loadingMsg.textContent = "Almost there...", 6000);
+    msgUpdate2 = setTimeout(() => loadingMsg.textContent = "Just tying up loose ends...", 12000);
+      
+timeoutAbort = setTimeout(() => {
+    localStorage.setItem("recoveredText", text);
+    alert("Something’s gone wrong!\nWe’ve copied your text into a fresh page for you to try again."); 
+    location.reload();
+    }, 120000); // 2 minutes
       responsesDiv.appendChild(container);
 
       try {
@@ -221,7 +246,9 @@
           body: JSON.stringify({ input: prompt })
         });
 
-        const data = await response.json();
+        clearTimeout(msgUpdate1);
+        clearTimeout(msgUpdate2);
+        clearTimeout(timeoutAbort);
         const formatted = marked.parse(data.plan);
 
         const controls = `
@@ -287,6 +314,12 @@
   } else {
     document.getElementById("welcomeModal").style.display = "none";
   }
+      const recovered = localStorage.getItem("recoveredText");
+if (recovered) {
+  document.getElementById("freeform").value = recovered;
+  document.getElementById("charCount").textContent = `${recovered.length} / 1000`;
+  localStorage.removeItem("recoveredText");
+}
 });
 
 function handleConsent(agreed) {
