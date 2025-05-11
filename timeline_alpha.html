@@ -318,16 +318,16 @@ Never include disclaimers, questions, or legal/medical advice.`;
 
   try {
     // simulate long wait for testing purposes:
-    await new Promise(resolve => setTimeout(resolve, 130000));
-    throw new Error("Simulated stuck response");
+    //await new Promise(resolve => setTimeout(resolve, 130000));
+    //throw new Error("Simulated stuck response");
 
     // ✅ in real use, you'd replace the two lines above with:
-    // const response = await fetch("https://shy-poetry-c035.peter-775.workers.dev", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({ input: prompt })
-    // });
-    // const data = await response.json();
+    const response = await fetch("https://shy-poetry-c035.peter-775.workers.dev", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ input: prompt })
+    });
+    const data = await response.json();
 
     const formatted = marked.parse(data.plan);
 
