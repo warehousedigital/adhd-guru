@@ -393,10 +393,12 @@ sendBtn.style.fontSize = "1rem";
 sendBtn.onclick = () => {
   sendBtn.disabled = true;
   responseBox.disabled = true;
-if (parentContainer.tagName === "DETAILS") {
-  parentContainer.open = false;
-}
-  sendFollowupResponse(responseBox.value, parentContainer);
+
+  if (container.tagName === "DETAILS") {
+    container.open = false;
+  }
+
+  sendFollowupResponse(responseBox.value, container);
 };
 
 followupWrapper.appendChild(responseBox);
