@@ -250,6 +250,18 @@ function handleConsent(agreed) {
   textarea.style.height = 'auto';
   textarea.style.height = textarea.scrollHeight + 'px';
 }
+
+async function logToGoogleSheet(data) {
+  try {
+    await fetch('https://script.google.com/macros/s/AKfycbwVpihqtw8jJcn7DTEsVP4BZX1oqAvUzMypsVum-KLreFlCc24A5AvhEaO4DBuOfPA/exec', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  } catch (error) {
+    console.error("Logging error:", error);
+  }
+}
     
 async function submitToAI() {
   const responsesDiv = document.getElementById("responses");
@@ -357,9 +369,29 @@ document.getElementById("summaryTime").textContent = `${amount} ${unit}`;
     const data = await response.json();
     window.latestUserPrompt = prompt;
     window.latestAIPlan = data.plan;
-    
+    logToGoogleSheet({
+  timestamp: window.userMeta.timestamp,
+  ip: window.userMeta.ip,
+  location: window.userMeta.location,
+  originalInput: document.getElementById("freeform").value,
+  timeInput: `${document.getElementById("timeAmount").value} ${document.getElementById("timeUnit").value}`,
+  aiPlan: data.plan,
+  followupMessage: '',
+  crisisPopupShown: window.userMeta.crisisPopupShown ? 'Yes' : 'No',
+  startNewPlanClicked: window.userMeta.startNewPlanClicked ? 'Yes' : 'No',
+});
     const formatted = marked.parse(data.plan);
-
+logToGoogleSheet({
+  timestamp: new Date().toISOString(),
+  ip: window.userMeta.ip,
+  location: window.userMeta.location,
+  originalInput: document.getElementById("freeform").value,
+  timeInput: `${document.getElementById("timeAmount").value} ${document.getElementById("timeUnit").value}`,
+  aiPlan: window.latestAIPlan,
+  followupMessage: userReply,
+  crisisPopupShown: window.userMeta.crisisPopupShown ? 'Yes' : 'No',
+  startNewPlanClicked: window.userMeta.startNewPlanClicked ? 'Yes' : 'No',
+});
     clearTimeout(msgUpdate1);
     clearTimeout(msgUpdate2);
     clearTimeout(timeoutAbort);
@@ -549,7 +581,22 @@ window.addEventListener("DOMContentLoaded", () => {
   } else {
     document.getElementById("welcomeModal").style.display = "none";
   }
+window.userMeta = {
+  timestamp: new Date().toISOString(),
+  crisisPopupShown: false,
+  startNewPlanClicked: false,
+};
 
+fetch('https://ipapi.co/json/')
+  .then(res => res.json())
+  .then(data => {
+    window.userMeta.ip = data.ip || 'unknown';
+    window.userMeta.location = `${data.city || ''}, ${data.region || ''}, ${data.country_name || ''}`;
+  })
+  .catch(() => {
+    window.userMeta.ip = 'unknown';
+    window.userMeta.location = 'unknown';
+  });
   const recovered = localStorage.getItem("recoveredText");
   if (recovered) {
     document.getElementById("freeform").value = recovered;
@@ -557,8 +604,9 @@ window.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("recoveredText");
   }
 });
-    function hideSupportPopup() {
+function hideSupportPopup() {
   document.getElementById("supportPopup").style.display = "none";
+  window.userMeta.crisisPopupShown = true;
 }
     
     function editInputs() {
@@ -568,6 +616,7 @@ window.addEventListener("DOMContentLoaded", () => {
   </script>
   
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
+
   
 </body>
 </html>
