@@ -242,13 +242,15 @@ const riskPhrases = [
   "ending it all", "give up on life", "overdose", "self harm", "hurt myself"
 ];
 
+// ✅ Suppress popup only if explicitly set (after a reload or recovery)
 if (sessionStorage.getItem("skipRiskCheckOnce") === "true") {
-  sessionStorage.removeItem("skipRiskCheckOnce"); // use it once
+  sessionStorage.removeItem("skipRiskCheckOnce");
 } else {
-  const detectedRisks = riskPhrases.filter(phrase => text.toLowerCase().includes(phrase));
+  const inputLower = text.toLowerCase();
+  const detectedRisks = riskPhrases.filter(phrase => inputLower.includes(phrase));
   if (detectedRisks.length > 0) {
     document.getElementById("supportPopup").style.display = "flex";
-    return; // stop further processing
+    return;
   }
 }
   
