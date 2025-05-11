@@ -243,7 +243,6 @@ const riskPhrases = [
 ];
 
 const inputLower = text.toLowerCase();
-const detectedRisks = riskPhrases.filter(phrase => inputLower.includes(phrase));
 
 // 🔐 Only trigger support popup if current user input includes risk phrases
 if (text && text.length > 0) {
