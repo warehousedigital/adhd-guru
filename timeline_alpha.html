@@ -396,7 +396,7 @@ sendBtn.onclick = () => {
 if (parentContainer.tagName === "DETAILS") {
   parentContainer.open = false;
 }
-  sendFollowupResponse(responseBox.value, container);
+  sendFollowupResponse(responseBox.value, parentContainer);
 };
 
 followupWrapper.appendChild(responseBox);
