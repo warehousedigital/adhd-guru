@@ -315,6 +315,16 @@ async function submitToAI() {
       a.click();
       URL.revokeObjectURL(url);
     }
+    
+    function handleConsent(agreed) {
+  if (agreed) {
+    localStorage.setItem("userAgreedToTerms", "true");
+    document.getElementById("welcomeModal").style.display = "none";
+  } else {
+    window.location.href = "https://www.google.com";
+  }
+}
+    
     window.addEventListener("DOMContentLoaded", () => {
   const hasAgreed = localStorage.getItem("userAgreedToTerms");
   if (hasAgreed !== "true") {
@@ -322,6 +332,7 @@ async function submitToAI() {
   } else {
     document.getElementById("welcomeModal").style.display = "none";
   }
+      
       const recovered = localStorage.getItem("recoveredText");
 if (recovered) {
   document.getElementById("freeform").value = recovered;
@@ -330,14 +341,6 @@ if (recovered) {
 }
 });
 
-function handleConsent(agreed) {
-  if (agreed) {
-    localStorage.setItem("userAgreedToTerms", "true");
-    document.getElementById("welcomeModal").style.display = "none";
-  } else {
-    window.location.href = "https://www.google.com";
-  }
-}
   </script>
 </body>
 </html>
