@@ -246,7 +246,7 @@ const inputLower = text.toLowerCase();
 const detectedRisks = riskPhrases.filter(phrase => inputLower.includes(phrase));
 
 if (detectedRisks.length > 0) {
-  document.getElementById("supportPopup").style.display = "flex";
+  document.getElementById("supportPopup").style.display = "none";
 }
   
   let adjustedHours = unit === "minutes" ? (parseFloat(amount) / 60) : unit === "days" ? parseFloat(amount) * 8 : parseFloat(amount);
