@@ -421,7 +421,86 @@ document.getElementById("summaryTime").textContent = `${amount} ${unit}`;
       a.click();
       URL.revokeObjectURL(url);
     }
+    
+  async function sendFollowupResponse(responseText, previousContainer) {
+    if (!responseText.trim()) return;
 
+    // Collapse previous
+    previousContainer.open = false;
+
+    const newContainer = document.createElement("details");
+    newContainer.className = "output";
+    newContainer.open = true;
+    const spinnerId = `spinner-${Date.now()}`;
+    newContainer.innerHTML = `<summary>📄 Follow-up Plan</summary>
+      <div id="${spinnerId}" class='spinner'></div>
+      <p id="loadingMsg">Generating your updated plan...</p>`;
+    previousContainer.insertAdjacentElement("afterend", newContainer);
+
+    const loadingMsg = document.getElementById("loadingMsg");
+    let msgUpdate1 = setTimeout(() => loadingMsg.textContent = "Almost there...", 10000);
+    let msgUpdate2 = setTimeout(() => loadingMsg.textContent = "Just tying up loose ends...", 20000);
+    let msgUpdate3 = setTimeout(() => loadingMsg.textContent = "Sorry this is taking so long...", 30000);
+    let msgUpdate4 = setTimeout(() => loadingMsg.textContent = "Well this is awkward...", 40000);
+    let msgUpdate5 = setTimeout(() => loadingMsg.textContent = "Oh, I give up...", 55000);
+    let timeoutAbort = setTimeout(() => {
+      alert("Something’s gone wrong!\nPlease try again.");
+      location.reload();
+    }, 60000);
+
+    try {
+      const followupPrompt = `The user followed up with this message:
+
+"${responseText}"
+
+Update or adjust the previous plan, offering specific follow-up advice based on this message.`;
+
+      const response = await fetch("https://shy-poetry-c035.peter-775.workers.dev", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ input: followupPrompt })
+      });
+      const data = await response.json();
+      const formatted = marked.parse(data.plan);
+
+      clearTimeout(msgUpdate1);
+      clearTimeout(msgUpdate2);
+      clearTimeout(timeoutAbort);
+
+      const controls = `
+        <div class="controls">
+          <button onclick="copyText(this)">📋</button>
+          <button onclick="downloadText(this)">💾</button>
+        </div>
+      `;
+      const inner = document.createElement("div");
+      inner.innerHTML = `${controls}${formatted}`;
+      newContainer.innerHTML = `<summary>📄 Follow-up Plan</summary>`;
+      newContainer.appendChild(inner);
+
+      const responseBox = document.createElement("textarea");
+      responseBox.rows = 3;
+      responseBox.placeholder = "More thoughts or questions? Type them here.";
+      const sendBtn = document.createElement("button");
+      sendBtn.textContent = "Send Response";
+
+      sendBtn.onclick = () => {
+        sendBtn.disabled = true;
+        responseBox.disabled = true;
+        sendFollowupResponse(responseBox.value, newContainer);
+      };
+
+      newContainer.appendChild(responseBox);
+      newContainer.appendChild(sendBtn);
+
+    } catch (err) {
+      clearTimeout(msgUpdate1);
+      clearTimeout(msgUpdate2);
+      clearTimeout(timeoutAbort);
+      newContainer.innerHTML = `<summary>Error</summary><p class='error'>Error: ${err.message}</p>`;
+    }
+  }
+    
 window.addEventListener("DOMContentLoaded", () => {
   const hasAgreed = localStorage.getItem("userAgreedToTerms");
   if (hasAgreed !== "true") {
