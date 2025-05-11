@@ -236,20 +236,19 @@ async function submitToAI() {
     return;
   }
   
- // 🔎 Check for high-risk language
+// 🔎 Check for high-risk language
 const riskPhrases = [
   "suicidal", "kill myself", "want to die", "can’t go on",
   "ending it all", "give up on life", "overdose", "self harm", "hurt myself"
 ];
 
-const inputLower = text.toLowerCase();
-
-// Only check risk if not a recovered submission
-if (!localStorage.getItem("suppressRiskCheck") && text.length > 0) {
+if (sessionStorage.getItem("skipRiskCheckOnce") === "true") {
+  sessionStorage.removeItem("skipRiskCheckOnce"); // use it once
+} else {
   const detectedRisks = riskPhrases.filter(phrase => text.toLowerCase().includes(phrase));
   if (detectedRisks.length > 0) {
     document.getElementById("supportPopup").style.display = "flex";
-    return;
+    return; // stop further processing
   }
 }
   
