@@ -436,7 +436,12 @@ container.appendChild(followupWrapper);
     
 async function sendFollowupResponse(userReply, parentContainer) {
   const responsesDiv = document.getElementById("responses");
-
+  const now = new Date();
+  const localTimeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const localDateString = now.toLocaleDateString([], { weekday: 'long' });
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const locale = navigator.language || 'en-GB';
+  const userTimeInfo = `Local time is approximately ${localTimeString} on ${localDateString}. Timezone - ${timezone}, Locale - ${locale}.`;
   const newContainer = document.createElement("details");
   newContainer.className = "output";
   newContainer.open = true;
@@ -447,7 +452,7 @@ async function sendFollowupResponse(userReply, parentContainer) {
 
   const spinner = newContainer.querySelector(".spinner");
 
-  const followupPrompt = `
+const followupPrompt = `
 You are continuing a helpful conversation with someone who's overwhelmed. 
 Here is the original plan you gave them:
 
@@ -456,6 +461,8 @@ Here is the original plan you gave them:
 They've now said this:
 
 "${userReply}"
+
+${userTimeInfo}
 
 Respond with updated thoughts or a new step-by-step plan if relevant. Be kind, clear, and focused on helping.
 
