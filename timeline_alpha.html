@@ -249,6 +249,11 @@ function handleConsent(agreed) {
       }
     });
 
+    function autoResize(textarea) {
+  textarea.style.height = 'auto';
+  textarea.style.height = textarea.scrollHeight + 'px';
+}
+    
 async function submitToAI() {
   const responsesDiv = document.getElementById("responses");
   const text = freeform.value.trim();
