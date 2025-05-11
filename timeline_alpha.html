@@ -229,13 +229,15 @@ async function submitToAI() {
   responsesDiv.appendChild(container);
 
   const loadingMsg = document.getElementById("loadingMsg");
-  let msgUpdate1 = setTimeout(() => loadingMsg.textContent = "Almost there...", 6000);
-  let msgUpdate2 = setTimeout(() => loadingMsg.textContent = "Just tying up loose ends...", 12000);
+  let msgUpdate1 = setTimeout(() => loadingMsg.textContent = "Almost there...", 10000);
+  let msgUpdate2 = setTimeout(() => loadingMsg.textContent = "Just tying up loose ends...", 20000);
+  let msgUpdate3 = setTimeout(() => loadingMsg.textContent = "Sorry this is taking so long...", 30000);
+  let msgUpdate4 = setTimeout(() => loadingMsg.textContent = "Well this is awkward...", 40000);
   let timeoutAbort = setTimeout(() => {
     localStorage.setItem("recoveredText", text);
     alert("Something’s gone wrong!\nWe’ve copied your text into a fresh page for you to try again.");
     location.reload();
-  }, 120000); // 2 minutes
+  }, 60000); // 1 minute
 
   try {
     // simulate long wait for testing purposes:
