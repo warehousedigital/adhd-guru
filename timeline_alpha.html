@@ -188,20 +188,28 @@
   <h1>🧠 Overwhelm → Action Converter</h1>
   <p class="intro">Feeling overwhelmed or anxious? This simple tool turns everything you type into a clear, realistic plan based on how much time you have. It’s fast, kind, and built to help you get unstuck.</p>
 
-  <textarea id="freeform" maxlength="1000" rows="7" placeholder="What’s on your mind? Tell me what you need to do, what’s bothering you, and what matters most right now."></textarea>
+ <div id="inputSection">
+  <textarea id="freeform" ... ></textarea>
   <div id="charCount" class="char-count">0 / 1000</div>
 
   <label>Roughly how much time do you have to work with?</label>
   <div class="inline">
-    <input type="number" id="timeAmount" min="1" placeholder="e.g. 3" />
+    <input type="number" id="timeAmount" ... />
     <select id="timeUnit">
       <option value="minutes">Minutes</option>
-      <option value="hours">Hours</option>
-      <option value="days">Days (8 working hours)</option>
+      ...
     </select>
   </div>
   <button id="mainPlanButton" onclick="submitToAI()">Make My Plan</button>
+</div>
 
+<!-- 🎯 Summary section -->
+<div id="inputSummary" style="display: none; background: #2a2a2a; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+  <p><strong>What you said:</strong> <span id="summaryText"></span></p>
+  <p><strong>Time available:</strong> <span id="summaryTime"></span></p>
+  <button onclick="editInputs()">Edit</button>
+</div>
+  
   <div id="responses"></div>
   
   <script>
