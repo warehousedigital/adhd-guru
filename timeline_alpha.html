@@ -247,7 +247,7 @@ if (sessionStorage.getItem("skipRiskCheckOnce") === "true") {
   const inputLower = text.toLowerCase();
   const detectedRisks = riskPhrases.filter(phrase => inputLower.includes(phrase));
   if (detectedRisks.length > 0) {
-    document.getElementById("supportPopup").style.display = "flex";
+    document.getElementById("supportPopup").style.display = none;
     return;
   }
 }
