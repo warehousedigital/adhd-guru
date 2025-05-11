@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+So this is my new script <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -122,16 +122,33 @@
     .error {
       color: #ff6b6b;
     }
-    #loadingMsg {
-      text-align: center;
-      margin-top: 1rem;
-      font-size: 1rem;
-      color: #ccc;
-    }
+      .error {
+    color: #ff6b6b;
+  }
+
+  /* 👇 Add this at the very end */
+  #loadingMsg {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: #ccc;
+  }
   </style>
 </head>
 <body>
-  <div id="welcomeModal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); color: white; display: flex; align-items: center; justify-content: center; z-index: 9999;">
+  
+    <!-- Consent Modal -->
+  <div id="welcomeModal" style="
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  ">
     <div style="background: #222; padding: 2rem; border-radius: 1rem; max-width: 500px; text-align: center;">
       <h2>Welcome to Overwhelm → Action Converter</h2>
       <p>This is an early Alpha version of the tool. Please read and accept the privacy policy and terms of use before continuing.</p>
@@ -142,23 +159,36 @@
       </div>
     </div>
   </div>
-
-  <div id="supportPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.95); color: white; z-index: 99999; align-items: center; justify-content: center; text-align: center; padding: 2rem; box-sizing: border-box;">
-    <div style="max-width: 600px; margin: auto;">
-      <h2>💬 It sounds like you're going through something really tough.</h2>
-      <p>Please know you're not alone. This tool isn't designed to help in a crisis, but support is available:</p>
-      <ul style="list-style: none; padding: 0; margin: 1rem 0;">
-        <li>📞 <strong>Samaritans (UK)</strong>: 116 123 – free, 24/7</li>
-        <li>📱 <strong>Text "SHOUT" to 85258</strong> – Crisis Text Line</li>
-        <li>🚨 <strong>Call 999</strong> in an emergency</li>
-      </ul>
-      <p>If you feel safe and okay to continue:</p>
-      <button onclick="hideSupportPopup()" style="margin-top: 1rem; padding: 0.75rem 1.5rem; font-size: 1rem;">I'm OK – Show me the plan</button>
-    </div>
+  <!-- Floating Support Popup -->
+<div id="supportPopup" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.95);
+  color: white;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  box-sizing: border-box;
+">
+  <div style="max-width: 600px;">
+    <h2>💬 It sounds like you're going through something really tough.</h2>
+    <p>Please know you're not alone. This tool isn't designed to help in a crisis, but support is available:</p>
+    <ul style="list-style: none; padding: 0; margin: 1rem 0;">
+      <li>📞 <strong>Samaritans (UK)</strong>: 116 123 – free, 24/7</li>
+      <li>📱 <strong>Text "SHOUT" to 85258</strong> – Crisis Text Line</li>
+      <li>🚨 <strong>Call 999</strong> in an emergency</li>
+    </ul>
+    <p>If you feel safe and okay to continue:</p>
+    <button onclick="hideSupportPopup()" style="margin-top: 1rem; padding: 0.75rem 1.5rem; font-size: 1rem;">I'm OK – Show me the plan</button>
   </div>
-
+</div>
   <h1>🧠 Overwhelm → Action Converter</h1>
-  <p class="intro">Feeling overwhelmed or anxious? This simple tool turns everything you type into a clear, realistic plan based on how much time you have.</p>
+  <p class="intro">Feeling overwhelmed or anxious? This simple tool turns everything you type into a clear, realistic plan based on how much time you have. It’s fast, kind, and built to help you get unstuck.</p>
 
   <textarea id="freeform" maxlength="1000" rows="7" placeholder="What’s on your mind? Tell me what you need to do, what’s bothering you, and what matters most right now."></textarea>
   <div id="charCount" class="char-count">0 / 1000</div>
@@ -178,74 +208,214 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
-    function handleConsent(agreed) {
-      if (agreed) {
-        localStorage.setItem("userAgreedToTerms", "true");
-        document.getElementById("welcomeModal").style.display = "none";
+    let promptHistory = [];
+
+    const freeform = document.getElementById("freeform");
+    const charCount = document.getElementById("charCount");
+    freeform.addEventListener("input", () => {
+      const len = freeform.value.length;
+      charCount.textContent = `${len} / 1000`;
+      if (len >= 1000) {
+        charCount.classList.add("full");
+        freeform.title = "You've reached the maximum character limit.";
+        freeform.value = freeform.value.substring(0, 1000);
       } else {
-        window.location.href = "https://www.google.com";
-      }
-    }
-
-    function hideSupportPopup() {
-      document.getElementById("supportPopup").style.display = "none";
-    }
-
-    window.addEventListener("DOMContentLoaded", () => {
-      const hasAgreed = localStorage.getItem("userAgreedToTerms");
-      document.getElementById("welcomeModal").style.display = hasAgreed === "true" ? "none" : "flex";
-
-      const recovered = localStorage.getItem("recoveredText");
-      if (recovered) {
-        document.getElementById("freeform").value = recovered;
-        document.getElementById("charCount").textContent = `${recovered.length} / 1000`;
-        localStorage.removeItem("recoveredText");
+        charCount.classList.remove("full");
+        freeform.removeAttribute("title");
       }
     });
 
-    async function submitToAI() {
-      const responsesDiv = document.getElementById("responses");
-      const text = freeform.value.trim();
-      const amount = document.getElementById("timeAmount").value.trim();
-      const unit = document.getElementById("timeUnit").value;
+async function submitToAI() {
+  const responsesDiv = document.getElementById("responses");
+  const text = freeform.value.trim();
+  const amount = document.getElementById("timeAmount").value.trim();
+  const unit = document.getElementById("timeUnit").value;
 
-      if (!text || !amount || isNaN(amount)) {
-        responsesDiv.innerHTML = "<p class='error'>Please enter your thoughts and how much time you have.</p>";
-        return;
-      }
+  if (!text || !amount || isNaN(amount)) {
+    responsesDiv.innerHTML = "<p class='error'>Please enter your thoughts and how much time you have.</p>";
+    return;
+  }
+  
+ // 🔎 Check for high-risk language
+const riskPhrases = [
+  "suicidal", "kill myself", "want to die", "can’t go on",
+  "ending it all", "give up on life", "overdose", "self harm", "hurt myself"
+];
 
-      const riskPhrases = ["suicidal", "kill myself", "want to die", "can’t go on", "ending it all", "give up on life", "overdose", "self harm", "hurt myself"];
-      const inputLower = text.toLowerCase();
-      const detectedRisks = riskPhrases.filter(phrase => inputLower.includes(phrase));
-      if (detectedRisks.length > 0) {
-        document.getElementById("supportPopup").style.display = "flex";
-      }
+const inputLower = text.toLowerCase();
+const detectedRisks = riskPhrases.filter(phrase => inputLower.includes(phrase));
 
-      const now = new Date();
-      const localTimeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const localDateString = now.toLocaleDateString([], { weekday: 'long' });
-      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const locale = navigator.language || 'en-GB';
-      const userTimeInfo = `User info: Local time is approximately ${localTimeString} on ${localDateString}. Timezone - ${timezone}, Locale - ${locale}`;
+if (detectedRisks.length > 0) {
+  document.getElementById("supportPopup").style.display = "flex";
+}
+  
+  let adjustedHours = unit === "minutes" ? (parseFloat(amount) / 60) : unit === "days" ? parseFloat(amount) * 8 : parseFloat(amount);
+  const now = new Date();
+  const localTimeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const localDateString = now.toLocaleDateString([], { weekday: 'long' });
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const locale = navigator.language || 'en-GB';
+  const toolPurpose = `This tool helps users who are feeling overwhelmed or anxious to turn their thoughts into realistic, time-based action plans. 
+                        It is not a therapy or crisis support tool and should not provide legal, financial, or medical advice.`;
+  const userTimeInfo = `User info: Local time is approximately ${localTimeString} on ${localDateString}. Timezone - ${timezone}, Locale - ${locale}`;
 
-      const toolPurpose = `This tool helps users who are feeling overwhelmed or anxious to turn their thoughts into a realistic, time-based action plan. It is not therapy or crisis support. It should never offer medical, legal, or financial advice.`;
+ const toolPurpose = `This tool helps users who are feeling overwhelmed or anxious to turn their thoughts into a realistic, time-based action plan.
+It is not therapy or crisis support. It should never offer medical, legal, or financial advice.`;
 
-      const prompt = `${toolPurpose}\n\nYour job is to help the user move from a mental overload to an achievable, well-paced plan. Be calm, grounded, helpful, and kind. Speak like a real person. Use UK spelling and grammar.\n\nThey've told us the following:\n\n"${text}"\n\nThey said they have around ${amount} ${unit} to work with.\n\nUse the following time guidance:\n- 1 day = 8 working hours\n- 1 week = 5 working days\n- No breaks are included in the time entered\n- Adjust your pacing and ambition based on how the user said they feel\n\n${userTimeInfo}\n\nFormat your response as follows:\n1. A short summary of what you understood\n2. A step-by-step action plan using bullet points\n3. A short, kind outro with gentle encouragement or useful suggestions\n\nUse markdown formatting with headings (#), **bold text**, and readable spacing. Never include disclaimers, questions, or legal/medical advice.`;
+const prompt = `${toolPurpose}
 
-      const container = document.createElement("details");
-      container.className = "output";
-      container.open = true;
-      const spinnerId = `spinner-${Date.now()}`;
-      container.innerHTML = `<summary>📄 Timeline Plan</summary><div id="${spinnerId}" class='spinner'></div><p id="loadingMsg">Generating your action plan...</p>`;
-      responsesDiv.appendChild(container);
+Your job is to help the user move from a mental overload to an achievable, well-paced plan. Be calm, grounded, helpful, and kind. Speak like a real person. Use UK spelling and grammar.
 
-      try {
-        await new Promise(resolve => setTimeout(resolve, 130000));
-        throw new Error("Simulated stuck response");
-      } catch (err) {
-        container.innerHTML = `<summary>Error</summary><p class='error'>Error: ${err.message}</p>`;
-      }
+They've told us the following:
+
+"${text}"
+
+They said they have around ${amount} ${unit} to work with.
+
+Use the following time guidance:
+- 1 day = 8 working hours
+- 1 week = 5 working days
+- No breaks are included in the time entered
+- Adjust your pacing and ambition based on how the user said they feel
+
+${userTimeInfo}
+
+Format your response as follows:
+1. A short summary of what you understood
+2. A step-by-step action plan using bullet points
+3. A short, kind outro with gentle encouragement or useful suggestions
+
+Use markdown formatting with headings (#), **bold text**, and readable spacing.
+Never include disclaimers, questions, or legal/medical advice.`;
+
+  const container = document.createElement("details");
+  container.className = "output";
+  container.open = true;
+  const spinnerId = `spinner-${Date.now()}`;
+  container.innerHTML = `<summary>📄 Timeline Plan</summary>
+    <div id="${spinnerId}" class='spinner'></div>
+    <p id="loadingMsg">Generating your action plan...</p>`;
+  responsesDiv.appendChild(container);
+
+  const loadingMsg = document.getElementById("loadingMsg");
+  let msgUpdate1 = setTimeout(() => loadingMsg.textContent = "Almost there...", 10000);
+  let msgUpdate2 = setTimeout(() => loadingMsg.textContent = "Just tying up loose ends...", 20000);
+  let msgUpdate3 = setTimeout(() => loadingMsg.textContent = "Sorry this is taking so long...", 30000);
+  let msgUpdate4 = setTimeout(() => loadingMsg.textContent = "Well this is awkward...", 40000);
+  let msgUpdate5 = setTimeout(() => loadingMsg.textContent = "Oh, I give up...", 55000);
+  let timeoutAbort = setTimeout(() => {
+    localStorage.setItem("recoveredText", text);
+    alert("Something’s gone wrong!\nWe’ve copied your text into a fresh page for you to try again.");
+    location.reload();
+  }, 60000); // 1 minute
+
+  try {
+    // simulate long wait for testing purposes:
+    await new Promise(resolve => setTimeout(resolve, 130000));
+    throw new Error("Simulated stuck response");
+
+    // ✅ in real use, you'd replace the two lines above with:
+    // const response = await fetch("https://shy-poetry-c035.peter-775.workers.dev", {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({ input: prompt })
+    // });
+    // const data = await response.json();
+
+    const formatted = marked.parse(data.plan);
+
+    clearTimeout(msgUpdate1);
+    clearTimeout(msgUpdate2);
+    clearTimeout(timeoutAbort);
+
+    const controls = `
+      <div class="controls">
+        <button onclick="copyText(this)">📋</button>
+        <button onclick="downloadText(this)">💾</button>
+      </div>
+    `;
+    const inner = document.createElement("div");
+    inner.innerHTML = `${controls}${formatted}`;
+    container.innerHTML = `<summary>📄 Timeline Plan</summary>`;
+    container.appendChild(inner);
+
+    const responseBox = document.createElement("textarea");
+    responseBox.rows = 3;
+    responseBox.placeholder = "Have any other questions or want to change some details? Type your response here.";
+
+    const sendBtn = document.createElement("button");
+    sendBtn.textContent = "Send Response";
+    sendBtn.onclick = () => {
+      sendBtn.disabled = true;
+      responseBox.disabled = true;
+      container.open = false;
+    };
+
+    container.appendChild(responseBox);
+    container.appendChild(sendBtn);
+
+  } catch (err) {
+    clearTimeout(msgUpdate1);
+    clearTimeout(msgUpdate2);
+    clearTimeout(timeoutAbort);
+    container.innerHTML = `<summary>Error</summary><p class='error'>Error: ${err.message}</p>`;
+  }
+}
+
+    function copyText(btn) {
+      const text = btn.closest(".output").innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const note = document.createElement("span");
+        note.textContent = "Copied to clipboard!";
+        note.style.marginLeft = "0.5rem";
+        note.style.color = "#90ee90";
+        btn.parentNode.appendChild(note);
+        setTimeout(() => note.remove(), 2000);
+      });
     }
+
+    function downloadText(btn) {
+      const text = btn.closest(".output").innerText;
+      const blob = new Blob([text], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const now = new Date();
+      const dateStr = now.toLocaleDateString("en-GB").replace(/\//g, "-");
+      const timeStr = now.toTimeString().slice(0, 5).replace(":", "-");
+      a.download = `My Timeline ${dateStr} ${timeStr}.txt`;
+      a.href = url;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    
+    function handleConsent(agreed) {
+  if (agreed) {
+    localStorage.setItem("userAgreedToTerms", "true");
+    document.getElementById("welcomeModal").style.display = "none";
+  } else {
+    window.location.href = "https://www.google.com";
+  }
+}
+    
+    window.addEventListener("DOMContentLoaded", () => {
+  const hasAgreed = localStorage.getItem("userAgreedToTerms");
+  if (hasAgreed !== "true") {
+    document.getElementById("welcomeModal").style.display = "flex";
+  } else {
+    document.getElementById("welcomeModal").style.display = "none";
+  }
+      
+      const recovered = localStorage.getItem("recoveredText");
+if (recovered) {
+  document.getElementById("freeform").value = recovered;
+  document.getElementById("charCount").textContent = `${recovered.length} / 1000`;
+  localStorage.removeItem("recoveredText");
+}
+});
+    function hideSupportPopup() {
+  document.getElementById("supportPopup").style.display = "none";
+}
+
   </script>
 </body>
 </html>
