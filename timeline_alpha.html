@@ -393,6 +393,9 @@ sendBtn.style.fontSize = "1rem";
 sendBtn.onclick = () => {
   sendBtn.disabled = true;
   responseBox.disabled = true;
+if (parentContainer.tagName === "DETAILS") {
+  parentContainer.open = false;
+}
   sendFollowupResponse(responseBox.value, container);
 };
 
