@@ -205,6 +205,14 @@
   <div id="responses"></div>
   
   <script>
+function handleConsent(agreed) {
+  if (agreed) {
+    localStorage.setItem("userAgreedToTerms", "true");
+    document.getElementById("welcomeModal").style.display = "none";
+  } else {
+    window.location.href = "https://www.google.com";
+  }
+}    
     let promptHistory = [];
 
     const freeform = document.getElementById("freeform");
@@ -386,15 +394,6 @@ Never include disclaimers, questions, or legal/medical advice.`;
       a.click();
       URL.revokeObjectURL(url);
     }
-    
-function handleConsent(agreed) {
-  if (agreed) {
-    localStorage.setItem("userAgreedToTerms", "true");
-    document.getElementById("welcomeModal").style.display = "none";
-  } else {
-    window.location.href = "https://www.google.com";
-  }
-}
 
 window.addEventListener("DOMContentLoaded", () => {
   const hasAgreed = localStorage.getItem("userAgreedToTerms");
