@@ -131,7 +131,6 @@
   </style>
 </head>
 <body>
-  <!-- Consent Modal -->
   <div id="welcomeModal" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); color: white; display: flex; align-items: center; justify-content: center; z-index: 9999;">
     <div style="background: #222; padding: 2rem; border-radius: 1rem; max-width: 500px; text-align: center;">
       <h2>Welcome to Overwhelm → Action Converter</h2>
@@ -144,7 +143,6 @@
     </div>
   </div>
 
-  <!-- Floating Support Popup -->
   <div id="supportPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.95); color: white; z-index: 99999; align-items: center; justify-content: center; text-align: center; padding: 2rem; box-sizing: border-box;">
     <div style="max-width: 600px; margin: auto;">
       <h2>💬 It sounds like you're going through something really tough.</h2>
@@ -158,5 +156,96 @@
       <button onclick="hideSupportPopup()" style="margin-top: 1rem; padding: 0.75rem 1.5rem; font-size: 1rem;">I'm OK – Show me the plan</button>
     </div>
   </div>
+
+  <h1>🧠 Overwhelm → Action Converter</h1>
+  <p class="intro">Feeling overwhelmed or anxious? This simple tool turns everything you type into a clear, realistic plan based on how much time you have.</p>
+
+  <textarea id="freeform" maxlength="1000" rows="7" placeholder="What’s on your mind? Tell me what you need to do, what’s bothering you, and what matters most right now."></textarea>
+  <div id="charCount" class="char-count">0 / 1000</div>
+
+  <label>Roughly how much time do you have to work with?</label>
+  <div class="inline">
+    <input type="number" id="timeAmount" min="1" placeholder="e.g. 3" />
+    <select id="timeUnit">
+      <option value="minutes">Minutes</option>
+      <option value="hours">Hours</option>
+      <option value="days">Days (8 working hours)</option>
+    </select>
+  </div>
+  <button id="mainPlanButton" onclick="submitToAI()">Make My Plan</button>
+
+  <div id="responses"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    function handleConsent(agreed) {
+      if (agreed) {
+        localStorage.setItem("userAgreedToTerms", "true");
+        document.getElementById("welcomeModal").style.display = "none";
+      } else {
+        window.location.href = "https://www.google.com";
+      }
+    }
+
+    function hideSupportPopup() {
+      document.getElementById("supportPopup").style.display = "none";
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const hasAgreed = localStorage.getItem("userAgreedToTerms");
+      document.getElementById("welcomeModal").style.display = hasAgreed === "true" ? "none" : "flex";
+
+      const recovered = localStorage.getItem("recoveredText");
+      if (recovered) {
+        document.getElementById("freeform").value = recovered;
+        document.getElementById("charCount").textContent = `${recovered.length} / 1000`;
+        localStorage.removeItem("recoveredText");
+      }
+    });
+
+    async function submitToAI() {
+      const responsesDiv = document.getElementById("responses");
+      const text = freeform.value.trim();
+      const amount = document.getElementById("timeAmount").value.trim();
+      const unit = document.getElementById("timeUnit").value;
+
+      if (!text || !amount || isNaN(amount)) {
+        responsesDiv.innerHTML = "<p class='error'>Please enter your thoughts and how much time you have.</p>";
+        return;
+      }
+
+      const riskPhrases = ["suicidal", "kill myself", "want to die", "can’t go on", "ending it all", "give up on life", "overdose", "self harm", "hurt myself"];
+      const inputLower = text.toLowerCase();
+      const detectedRisks = riskPhrases.filter(phrase => inputLower.includes(phrase));
+      if (detectedRisks.length > 0) {
+        document.getElementById("supportPopup").style.display = "flex";
+      }
+
+      const now = new Date();
+      const localTimeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const localDateString = now.toLocaleDateString([], { weekday: 'long' });
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const locale = navigator.language || 'en-GB';
+      const userTimeInfo = `User info: Local time is approximately ${localTimeString} on ${localDateString}. Timezone - ${timezone}, Locale - ${locale}`;
+
+      const toolPurpose = `This tool helps users who are feeling overwhelmed or anxious to turn their thoughts into a realistic, time-based action plan. It is not therapy or crisis support. It should never offer medical, legal, or financial advice.`;
+
+      const prompt = `${toolPurpose}\n\nYour job is to help the user move from a mental overload to an achievable, well-paced plan. Be calm, grounded, helpful, and kind. Speak like a real person. Use UK spelling and grammar.\n\nThey've told us the following:\n\n"${text}"\n\nThey said they have around ${amount} ${unit} to work with.\n\nUse the following time guidance:\n- 1 day = 8 working hours\n- 1 week = 5 working days\n- No breaks are included in the time entered\n- Adjust your pacing and ambition based on how the user said they feel\n\n${userTimeInfo}\n\nFormat your response as follows:\n1. A short summary of what you understood\n2. A step-by-step action plan using bullet points\n3. A short, kind outro with gentle encouragement or useful suggestions\n\nUse markdown formatting with headings (#), **bold text**, and readable spacing. Never include disclaimers, questions, or legal/medical advice.`;
+
+      const container = document.createElement("details");
+      container.className = "output";
+      container.open = true;
+      const spinnerId = `spinner-${Date.now()}`;
+      container.innerHTML = `<summary>📄 Timeline Plan</summary><div id="${spinnerId}" class='spinner'></div><p id="loadingMsg">Generating your action plan...</p>`;
+      responsesDiv.appendChild(container);
+
+      try {
+        await new Promise(resolve => setTimeout(resolve, 130000));
+        throw new Error("Simulated stuck response");
+      } catch (err) {
+        container.innerHTML = `<summary>Error</summary><p class='error'>Error: ${err.message}</p>`;
+      }
+    }
+  </script>
 </body>
 </html>
