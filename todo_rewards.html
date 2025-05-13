@@ -3,38 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fun To-Do Rewards</title>
+  <title>Fun ADHD To-Do List</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #eef6f9;
-      color: #333;
+      background-color: #f0f4f8;
       padding: 2rem;
       max-width: 600px;
-      margin: 0 auto;
+      margin: auto;
+      color: #333;
     }
     h1 {
-      color: #2c6975;
+      color: #444;
       text-align: center;
-    }
-    input[type="text"] {
-      width: 70%;
-      padding: 0.5rem;
-      border-radius: 0.3rem;
-      border: 1px solid #ccc;
-      margin-right: 0.5rem;
-    }
-    button {
-      padding: 0.5rem 1rem;
-      background-color: #68b0ab;
-      border: none;
-      color: white;
-      font-weight: bold;
-      border-radius: 0.3rem;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #4d908e;
     }
     ul {
       list-style: none;
@@ -42,71 +24,69 @@
     }
     li {
       background: #ffffff;
-      padding: 0.75rem;
-      border-radius: 0.3rem;
-      margin: 0.5rem 0;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.5rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      border-left: 5px solid #68b0ab;
-      transition: all 0.3s ease;
+      align-items: center;
     }
     li.completed {
       text-decoration: line-through;
       opacity: 0.6;
-      border-left: 5px solid #ccc;
     }
-    .todo-text {
-      flex: 1;
+    input[type="text"] {
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 0.4rem;
     }
-    .drag-handle {
-      cursor: grab;
-      margin-left: 1rem;
+    button {
+      padding: 0.5rem 1rem;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 0.4rem;
+      cursor: pointer;
     }
-    canvas.confetti {
-      position: fixed;
-      pointer-events: none;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 9999;
+    button:hover {
+      background-color: #45a049;
     }
   </style>
 </head>
 <body>
-  <h1>🎯 My Fun To-Do List</h1>
-  <div>
-    <input type="text" id="taskInput" placeholder="What do you need to do?" />
-    <button onclick="addTask()">Add</button>
-  </div>
-  <ul id="todoList"></ul>
-  <canvas class="confetti"></canvas>
-  <audio id="celebrationSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_7e7f38d95d.mp3?filename=small-crowd-cheer-6713.mp3"></audio>
+  <h1>🎉 ADHD To-Do Rewards</h1>
+  <input type="text" id="taskInput" placeholder="Add a task and hit enter...">
+  <ul id="taskList"></ul>
 
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script>
-    const todoList = document.getElementById('todoList');
-    const celebrationSound = document.getElementById('celebrationSound');
+    const celebrationSounds = [
+      "assets/Aint_no_stoppin.wav",
+      "assets/Celebrate.mp3",
+      "assets/Champions.wav",
+      "assets/Dont_stop_believin.wav",
+      "assets/Fresh_avocado.wav",
+      "assets/Get_Busy.wav",
+      "assets/Have_you_ever_had_a_dream.wav",
+      "assets/Lemons.wav",
+      "assets/Lose_yourself.wav",
+      "assets/On_Top_Of_the_World.wav",
+      "assets/Room_Mates.wav",
+      "assets/Thomas.wav",
+      "assets/very_good_very_nice.wav",
+      "assets/youre_the_best.wav"
+    ];
 
-    function addTask() {
-      const input = document.getElementById('taskInput');
-      const text = input.value.trim();
-      if (text === '') return;
-      const li = document.createElement('li');
-      li.innerHTML = `<span class="todo-text">${text}</span>
-        <input type="checkbox" onchange="completeTask(this)" />
-        <span class="drag-handle">☰</span>`;
-      todoList.appendChild(li);
-      input.value = '';
+    function playRandomCelebrationSound() {
+      const randomIndex = Math.floor(Math.random() * celebrationSounds.length);
+      const sound = new Audio(celebrationSounds[randomIndex]);
+      sound.play();
     }
 
-    function completeTask(checkbox) {
-      const li = checkbox.closest('li');
-      li.classList.toggle('completed');
-      celebrationSound.currentTime = 0;
-      celebrationSound.play();
+    function launchConfetti() {
       confetti({
         particleCount: 100,
         spread: 70,
@@ -114,10 +94,38 @@
       });
     }
 
-    new Sortable(todoList, {
-      handle: '.drag-handle',
-      animation: 150
+    const taskInput = document.getElementById("taskInput");
+    const taskList = document.getElementById("taskList");
+
+    taskInput.addEventListener("keypress", function(event) {
+      if (event.key === "Enter" && taskInput.value.trim()) {
+        addTask(taskInput.value.trim());
+        taskInput.value = "";
+      }
     });
+
+    function addTask(text) {
+      const li = document.createElement("li");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+
+      checkbox.addEventListener("change", () => {
+        if (checkbox.checked) {
+          li.classList.add("completed");
+          playRandomCelebrationSound();
+          launchConfetti();
+        } else {
+          li.classList.remove("completed");
+        }
+      });
+
+      const span = document.createElement("span");
+      span.textContent = text;
+
+      li.appendChild(span);
+      li.appendChild(checkbox);
+      taskList.appendChild(li);
+    }
   </script>
 </body>
 </html>
