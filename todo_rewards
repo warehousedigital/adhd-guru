@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎉 Fun To-Do List</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #1e1e1e;
+      color: #f0f0f0;
+      padding: 2rem;
+      max-width: 700px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #ffd700;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 0.5rem;
+      border: 1px solid #444;
+      background: #2a2a2a;
+      color: #fff;
+    }
+    button {
+      margin-top: 0.5rem;
+      width: 100%;
+      padding: 0.6rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: #4caf50;
+      color: white;
+      cursor: pointer;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      display: flex;
+      align-items: center;
+      margin-top: 1rem;
+      background: #2e2e2e;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+    }
+    li input[type="checkbox"] {
+      margin-right: 1rem;
+      transform: scale(1.3);
+    }
+    img.reward {
+      max-width: 100%;
+      border-radius: 1rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>✅ My Fun To-Do List</h1>
+  <input type="text" id="taskInput" placeholder="What do you want to achieve today?">
+  <button onclick="addTask()">Add to List</button>
+  <ul id="taskList"></ul>
+
+  <div id="rewardContainer"></div>
+
+  <script>
+    const rewards = [
+      "https://placekitten.com/400/300",
+      "https://placebear.com/400/300",
+      "https://loremflickr.com/400/300/bunny",
+      "https://loremflickr.com/400/300/panda",
+      "https://loremflickr.com/400/300/duckling"
+    ];
+
+    function addTask() {
+      const input = document.getElementById('taskInput');
+      const value = input.value.trim();
+      if (!value) return;
+
+      const li = document.createElement('li');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.onchange = () => handleComplete(checkbox);
+
+      const span = document.createElement('span');
+      span.textContent = value;
+
+      li.appendChild(checkbox);
+      li.appendChild(span);
+      document.getElementById('taskList').appendChild(li);
+      input.value = '';
+    }
+
+    function handleComplete(checkbox) {
+      if (!checkbox.checked) return;
+
+      const reward = document.createElement('img');
+      reward.className = 'reward';
+      reward.src = rewards[Math.floor(Math.random() * rewards.length)];
+
+      const rewardContainer = document.getElementById('rewardContainer');
+      rewardContainer.innerHTML = '';
+      rewardContainer.appendChild(reward);
+
+      // Optional: remove task after 2 seconds
+      setTimeout(() => {
+        checkbox.parentElement.remove();
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
